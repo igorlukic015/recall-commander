@@ -37,9 +37,17 @@ app.Configure(config =>
     config.AddCommand<ScanCommand>("scan")
         .WithDescription("Scan all question sources and report discovered questions.");
 
+    config.AddBranch("assessment", assessment =>
+    {
+        assessment.SetDescription("Work with assessments.");
+
+        assessment.AddCommand<AssessmentCreateCommand>("create")
+            .WithDescription("Generate an assessment from discovered questions.");
+    });
+
     config.SetExceptionHandler((exception, _) =>
     {
-        if (exception is WorkspaceNotInitializedException)
+        if (exception is WorkspaceNotInitializedException or CommandRuntimeException)
         {
             AnsiConsole.MarkupLineInterpolated($"[red]{exception.Message}[/]");
         }

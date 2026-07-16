@@ -10,17 +10,17 @@ public sealed class ArtifactWriterRegistrationTests
 
     private sealed class TestRenderer : IArtifactRenderer<TestArtifact>
     {
-        public ArtifactContent Render(TestArtifact artifact) => new("test", "# Test\n");
+        public ArtifactContent Render(TestArtifact artifact) => new("test", "Tests", "# Test\n");
     }
 
     private sealed class NoopStore : IArtifactStore
     {
         public Task<string> SaveAsync(
             string directoryPath,
-            string fileName,
+            string fileNameStem,
             string markdown,
             CancellationToken cancellationToken = default) =>
-            Task.FromResult(Path.Combine(directoryPath, fileName));
+            Task.FromResult(Path.Combine(directoryPath, $"{fileNameStem}-001.md"));
     }
 
     private sealed class NoopOutputPath : IArtifactOutputPathProvider

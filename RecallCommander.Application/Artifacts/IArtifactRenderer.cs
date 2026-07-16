@@ -11,21 +11,26 @@ public interface IArtifactRenderer<in T>
 }
 
 /// <summary>
-/// The rendered form of an artifact: its complete Markdown document and a
-/// slug used to derive the file name.
+/// The rendered form of an artifact: its complete Markdown document, a slug
+/// used to derive the file name, and the directory this artifact type lives in.
 /// </summary>
 public sealed record ArtifactContent
 {
-    public ArtifactContent(string slug, string markdown)
+    public ArtifactContent(string slug, string directoryName, string markdown)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(slug);
+        ArgumentException.ThrowIfNullOrWhiteSpace(directoryName);
         ArgumentException.ThrowIfNullOrWhiteSpace(markdown);
         Slug = slug;
+        DirectoryName = directoryName;
         Markdown = markdown;
     }
 
-    /// <summary>Human-readable name stem, e.g. "csharp-internals-assessment".</summary>
+    /// <summary>File name stem, e.g. "assessment".</summary>
     public string Slug { get; }
+
+    /// <summary>Subdirectory of the artifact output root, e.g. "Assessments".</summary>
+    public string DirectoryName { get; }
 
     /// <summary>The full document: YAML frontmatter followed by the Markdown body.</summary>
     public string Markdown { get; }

@@ -12,13 +12,15 @@ Users keep their knowledge in plain Markdown files, organized however they like.
 
 Recall Commander is under active development. The `Docs/` folder contains the full specification for **MVP 1**.
 
-The first vertical slice — the question discovery pipeline — is implemented:
+The question discovery and assessment generation slices are implemented:
 
 ```
-rc init                  # initialize the metadata store (SQLite)
-rc source add <path>     # register a directory of Markdown question files
-rc source list           # list registered question sources
-rc scan                  # discover Question Blocks across all sources
+rc init                        # initialize the metadata store (SQLite)
+rc source add <path>           # register a directory of Markdown question files
+rc source list                 # list registered question sources
+rc scan                        # discover Question Blocks across all sources
+rc assessment create           # generate an assessment (default: 10 questions)
+rc assessment create --count 5 # generate an assessment with 5 questions
 ```
 
 Build and run with the .NET SDK:

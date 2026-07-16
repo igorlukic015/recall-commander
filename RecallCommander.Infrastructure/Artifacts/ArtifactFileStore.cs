@@ -3,38 +3,30 @@ using RecallCommander.Application.Artifacts;
 namespace RecallCommander.Infrastructure.Artifacts;
 
 /// <summary>
-/// Writes artifacts to disk. Existing files are never overwritten — artifacts
-/// are historical records — so name collisions get a numeric suffix.
+/// Writes artifacts to disk under deterministic sequenced names: the first
+/// free "{stem}-NNN.md" slot, counting up from 001. Existing files are never
+/// overwritten — artifacts are historical records.
 /// </summary>
-public sealed class ArtifactFileStore : IArtifactStore
+public sealed class ArtifactFileStore(ArtifactFileNameGenerator fileNames) : IArtifactStore
 {
     public async Task<string> SaveAsync(
         string directoryPath,
-        string fileName,
+        string fileNameStem,
         string markdown,
         CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(directoryPath);
 
-        var filePath = MakeUnique(Path.Combine(directoryPath, fileName));
+        var filePath = NextAvailablePath(directoryPath, fileNameStem);
         await File.WriteAllTextAsync(filePath, markdown, cancellationToken);
         return filePath;
     }
 
-    private static string MakeUnique(string filePath)
+    private string NextAvailablePath(string directoryPath, string fileNameStem)
     {
-        if (!File.Exists(filePath))
+        for (var sequence = 1; ; sequence++)
         {
-            return filePath;
-        }
-
-        var directory = Path.GetDirectoryName(filePath)!;
-        var stem = Path.GetFileNameWithoutExtension(filePath);
-        var extension = Path.GetExtension(filePath);
-
-        for (var suffix = 2; ; suffix++)
-        {
-            var candidate = Path.Combine(directory, $"{stem}-{suffix}{extension}");
+            var candidate = Path.Combine(directoryPath, fileNames.CreateNumberedFileName(fileNameStem, sequence));
             if (!File.Exists(candidate))
             {
                 return candidate;

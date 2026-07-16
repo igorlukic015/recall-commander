@@ -1,6 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using RecallCommander.Application.Abstractions;
+using RecallCommander.Application.Artifacts;
+using RecallCommander.Domain;
 using RecallCommander.Markdown.Parsing;
+using RecallCommander.Markdown.Writing;
 
 namespace RecallCommander.Markdown;
 
@@ -9,6 +12,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRecallCommanderMarkdown(this IServiceCollection services)
     {
         services.AddSingleton<IQuestionBlockParser, QuestionBlockParser>();
+        services.AddSingleton<IArtifactRenderer<Assessment>, AssessmentRenderer>();
         return services;
     }
 }

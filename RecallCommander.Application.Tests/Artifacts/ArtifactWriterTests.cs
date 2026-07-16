@@ -10,27 +10,27 @@ public sealed class ArtifactWriterTests
     private sealed class TestRenderer : IArtifactRenderer<TestArtifact>
     {
         public ArtifactContent Render(TestArtifact artifact) =>
-            new(artifact.Title, $"# {artifact.Title}\n");
+            new(artifact.Title, "TestArtifacts", $"# {artifact.Title}\n");
     }
 
     private sealed class RecordingStore : IArtifactStore
     {
         public string? DirectoryPath { get; private set; }
 
-        public string? FileName { get; private set; }
+        public string? FileNameStem { get; private set; }
 
         public string? Markdown { get; private set; }
 
         public Task<string> SaveAsync(
             string directoryPath,
-            string fileName,
+            string fileNameStem,
             string markdown,
             CancellationToken cancellationToken = default)
         {
             DirectoryPath = directoryPath;
-            FileName = fileName;
+            FileNameStem = fileNameStem;
             Markdown = markdown;
-            return Task.FromResult(Path.Combine(directoryPath, fileName));
+            return Task.FromResult(Path.Combine(directoryPath, $"{fileNameStem}-001.md"));
         }
     }
 
@@ -57,9 +57,11 @@ public sealed class ArtifactWriterTests
 
         var saved = await writer.WriteAsync(new TestArtifact("My Assessment"));
 
-        Assert.Equal("/output", store.DirectoryPath);
-        Assert.Equal("my-assessment-20260716-193000.md", store.FileName);
+        Assert.Equal(Path.Combine("/output", "TestArtifacts"), store.DirectoryPath);
+        Assert.Equal("my-assessment-2026-07-16", store.FileNameStem);
         Assert.Equal("# My Assessment\n", store.Markdown);
-        Assert.Equal(Path.Combine("/output", "my-assessment-20260716-193000.md"), saved.FilePath);
+        Assert.Equal(
+            Path.Combine("/output", "TestArtifacts", "my-assessment-2026-07-16-001.md"),
+            saved.FilePath);
     }
 }
