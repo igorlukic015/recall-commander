@@ -10,7 +10,24 @@ Users keep their knowledge in plain Markdown files, organized however they like.
 
 ## Status
 
-Recall Commander is in the design phase. The `Docs/` folder contains the full specification for **MVP 1**; implementation has not started yet.
+Recall Commander is under active development. The `Docs/` folder contains the full specification for **MVP 1**.
+
+The first vertical slice — the question discovery pipeline — is implemented:
+
+```
+rc init                  # initialize the metadata store (SQLite)
+rc source add <path>     # register a directory of Markdown question files
+rc source list           # list registered question sources
+rc scan                  # discover Question Blocks across all sources
+```
+
+Build and run with the .NET SDK:
+
+```
+dotnet build
+dotnet test
+dotnet run --project RecallCommander.Cli -- scan
+```
 
 ## Core Philosophy
 

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="Dapper" />
+        <PackageReference Include="Microsoft.Data.Sqlite" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../RecallCommander.Application/RecallCommander.Application.csproj" />
+        <ProjectReference Include="../RecallCommander.Domain/RecallCommander.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

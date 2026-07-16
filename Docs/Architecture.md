@@ -60,31 +60,31 @@ The Domain layer has no dependencies on external systems.
 
 # Solution Structure
 
+All projects live directly in the repository root next to the solution file.
+
 ```
 RecallCommander/
 
 │
-├── src/
+├── RecallCommander.Cli/
 │
-│   ├── RecallCommander.Cli/
-│   │
-│   ├── RecallCommander.Application/
-│   │
-│   ├── RecallCommander.Domain/
-│   │
-│   ├── RecallCommander.Infrastructure/
-│   │
-│   └── RecallCommander.Markdown/
+├── RecallCommander.Application/
 │
-├── tests/
+├── RecallCommander.Domain/
 │
-│   ├── RecallCommander.Domain.Tests/
-│   │
-│   ├── RecallCommander.Application.Tests/
-│   │
-│   └── RecallCommander.Markdown.Tests/
+├── RecallCommander.Infrastructure/
 │
-├── docs/
+├── RecallCommander.Markdown/
+│
+├── RecallCommander.Domain.Tests/
+│
+├── RecallCommander.Application.Tests/
+│
+├── RecallCommander.Markdown.Tests/
+│
+├── Docs/
+│
+├── RecallCommander.slnx
 │
 └── README.md
 ```
