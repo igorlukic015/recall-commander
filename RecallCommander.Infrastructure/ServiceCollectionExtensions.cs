@@ -1,5 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using RecallCommander.Application.Abstractions;
+using RecallCommander.Application.Artifacts;
+using RecallCommander.Infrastructure.Artifacts;
 using RecallCommander.Infrastructure.Database;
 using RecallCommander.Infrastructure.FileSystem;
 
@@ -14,6 +16,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IWorkspaceInitializer, WorkspaceInitializer>();
         services.AddSingleton<IQuestionSourceRepository, SqliteQuestionSourceRepository>();
         services.AddSingleton<IFileSystem, PhysicalFileSystem>();
+        services.AddSingleton<IArtifactStore, ArtifactFileStore>();
+        services.AddSingleton<IArtifactOutputPathProvider, CurrentDirectoryArtifactOutputPathProvider>();
         return services;
     }
 }
