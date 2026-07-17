@@ -18,10 +18,10 @@ public sealed class RandomQuestionSelector(Random random) : IQuestionSelector
         ArgumentNullException.ThrowIfNull(questions);
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
 
-        var shuffled = questions.ToArray();
-        for (var index = shuffled.Length - 1; index > 0; index--)
+        Question[] shuffled = questions.ToArray();
+        for (int index = shuffled.Length - 1; index > 0; index--)
         {
-            var swapIndex = random.Next(index + 1);
+            int swapIndex = random.Next(index + 1);
             (shuffled[index], shuffled[swapIndex]) = (shuffled[swapIndex], shuffled[index]);
         }
 

@@ -1,5 +1,5 @@
-using Xunit;
 using RecallCommander.IntegrationTests.Support;
+using Xunit;
 
 namespace RecallCommander.IntegrationTests.EndToEnd;
 
@@ -30,19 +30,19 @@ public sealed class AssessmentWorkflowTests : IDisposable
         _workspace.WriteQuestionFile("broken.md", SampleQuestions.MissingPromptBlock());
 
         // Act + Assert: each step of the workflow succeeds.
-        var init = await _cli.RunAsync("init");
+        CliResult init = await _cli.RunAsync("init");
         Assert.Equal(0, init.ExitCode);
         Assert.Contains("Initialized", init.Output);
 
-        var add = await _cli.RunAsync("source", "add", _workspace.QuestionsDirectory);
+        CliResult add = await _cli.RunAsync("source", "add", _workspace.QuestionsDirectory);
         Assert.Equal(0, add.ExitCode);
         Assert.Contains("Registered question source", add.Output);
 
-        var list = await _cli.RunAsync("source", "list");
+        CliResult list = await _cli.RunAsync("source", "list");
         Assert.Equal(0, list.ExitCode);
         Assert.Contains("Questions", list.Output);
 
-        var scan = await _cli.RunAsync("scan");
+        CliResult scan = await _cli.RunAsync("scan");
         Assert.Equal(0, scan.ExitCode);
         Assert.Contains("csharp.md", scan.Output);
         Assert.Contains("Found 3 questions", scan.Output);
@@ -50,15 +50,15 @@ public sealed class AssessmentWorkflowTests : IDisposable
         Assert.Contains("broken.md:1", scan.Output);
         Assert.Contains("Missing rc-prompt", scan.Output);
 
-        var create = await _cli.RunAsync("assessment", "create", "--count", "3");
+        CliResult create = await _cli.RunAsync("assessment", "create", "--count", "3");
         Assert.Equal(0, create.ExitCode);
         Assert.Contains("Assessment created.", create.Output);
         Assert.Contains("Questions: 3", create.Output);
 
         // Assert: the generated artifact is a valid assessment document.
-        var assessmentFile = Assert.Single(
+        string assessmentFile = Assert.Single(
             Directory.GetFiles(_workspace.AssessmentsDirectory, "assessment-*-001.md"));
-        var document = await File.ReadAllTextAsync(assessmentFile);
+        string document = await File.ReadAllTextAsync(assessmentFile);
 
         Assert.StartsWith("---\n", document);
         Assert.Contains("type: assessment", document);
@@ -75,7 +75,7 @@ public sealed class AssessmentWorkflowTests : IDisposable
         await _cli.RunAsync("init");
         await _cli.RunAsync("source", "add", _workspace.QuestionsDirectory);
 
-        var create = await _cli.RunAsync("assessment", "create");
+        CliResult create = await _cli.RunAsync("assessment", "create");
 
         // Only 3 questions exist, so all of them are included.
         Assert.Equal(0, create.ExitCode);
@@ -85,7 +85,7 @@ public sealed class AssessmentWorkflowTests : IDisposable
     [Fact]
     public async Task Commands_requiring_a_workspace_fail_cleanly_before_init()
     {
-        var scan = await _cli.RunAsync("scan");
+        CliResult scan = await _cli.RunAsync("scan");
 
         Assert.Equal(1, scan.ExitCode);
         Assert.Contains("Run 'rc init' first", scan.Output);
@@ -94,8 +94,8 @@ public sealed class AssessmentWorkflowTests : IDisposable
     [Fact]
     public async Task Init_is_idempotent()
     {
-        var first = await _cli.RunAsync("init");
-        var second = await _cli.RunAsync("init");
+        CliResult first = await _cli.RunAsync("init");
+        CliResult second = await _cli.RunAsync("init");
 
         Assert.Equal(0, first.ExitCode);
         Assert.Equal(0, second.ExitCode);
@@ -107,7 +107,7 @@ public sealed class AssessmentWorkflowTests : IDisposable
     {
         await _cli.RunAsync("init");
 
-        var add = await _cli.RunAsync("source", "add", Path.Combine(_workspace.Root, "nope"));
+        CliResult add = await _cli.RunAsync("source", "add", Path.Combine(_workspace.Root, "nope"));
 
         Assert.Equal(1, add.ExitCode);
         Assert.Contains("Directory not found", add.Output);
@@ -119,7 +119,7 @@ public sealed class AssessmentWorkflowTests : IDisposable
         await _cli.RunAsync("init");
         await _cli.RunAsync("source", "add", _workspace.QuestionsDirectory);
 
-        var duplicate = await _cli.RunAsync("source", "add", _workspace.QuestionsDirectory);
+        CliResult duplicate = await _cli.RunAsync("source", "add", _workspace.QuestionsDirectory);
 
         Assert.Equal(0, duplicate.ExitCode);
         Assert.Contains("already registered", duplicate.Output);
@@ -131,7 +131,7 @@ public sealed class AssessmentWorkflowTests : IDisposable
         await _cli.RunAsync("init");
         await _cli.RunAsync("source", "add", _workspace.QuestionsDirectory);
 
-        var create = await _cli.RunAsync("assessment", "create");
+        CliResult create = await _cli.RunAsync("assessment", "create");
 
         Assert.Equal(1, create.ExitCode);
         Assert.Contains("No questions found", create.Output);
@@ -143,7 +143,7 @@ public sealed class AssessmentWorkflowTests : IDisposable
     {
         await _cli.RunAsync("init");
 
-        var create = await _cli.RunAsync("assessment", "create", "--count", "0");
+        CliResult create = await _cli.RunAsync("assessment", "create", "--count", "0");
 
         Assert.Equal(1, create.ExitCode);
         Assert.Contains("--count must be greater than zero", create.Output);
@@ -159,7 +159,7 @@ public sealed class AssessmentWorkflowTests : IDisposable
         await _cli.RunAsync("assessment", "create", "--count", "2");
         await _cli.RunAsync("assessment", "create", "--count", "2");
 
-        var files = Directory.GetFiles(_workspace.AssessmentsDirectory)
+        List<string?> files = Directory.GetFiles(_workspace.AssessmentsDirectory)
             .Select(Path.GetFileName)
             .Order()
             .ToList();

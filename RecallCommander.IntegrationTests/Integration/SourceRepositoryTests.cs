@@ -1,7 +1,9 @@
-using Xunit;
 using RecallCommander.Contracts.Exceptions;
+using RecallCommander.Contracts.Workspace;
+using RecallCommander.Domain;
 using RecallCommander.Infrastructure.Database;
 using RecallCommander.IntegrationTests.Support;
+using Xunit;
 
 namespace RecallCommander.IntegrationTests.Integration;
 
@@ -29,8 +31,8 @@ public sealed class SourceRepositoryTests : IDisposable
     [Fact]
     public async Task Initialize_creates_the_database_and_is_idempotent()
     {
-        var first = await new WorkspaceInitializer(_paths).InitializeAsync();
-        var second = await new WorkspaceInitializer(_paths).InitializeAsync();
+        InitializationResult first = await new WorkspaceInitializer(_paths).InitializeAsync();
+        InitializationResult second = await new WorkspaceInitializer(_paths).InitializeAsync();
 
         Assert.True(first.Created);
         Assert.False(second.Created);
@@ -41,13 +43,13 @@ public sealed class SourceRepositoryTests : IDisposable
     public async Task Sources_roundtrip_through_sqlite()
     {
         await InitializeAsync();
-        var repository = CreateRepository();
-        var registeredAt = new DateTimeOffset(2026, 7, 16, 12, 30, 45, TimeSpan.Zero);
+        SqliteQuestionSourceRepository repository = CreateRepository();
+        DateTimeOffset registeredAt = new DateTimeOffset(2026, 7, 16, 12, 30, 45, TimeSpan.Zero);
 
         await repository.AddAsync("/notes/csharp", registeredAt);
         await repository.AddAsync("/notes/physics", registeredAt.AddMinutes(5));
 
-        var sources = await repository.GetAllAsync();
+        IReadOnlyList<QuestionSource> sources = await repository.GetAllAsync();
 
         Assert.Equal(2, sources.Count);
         Assert.Equal("/notes/csharp", sources[0].DirectoryPath);
@@ -60,7 +62,7 @@ public sealed class SourceRepositoryTests : IDisposable
     public async Task Exists_matches_registered_paths_exactly()
     {
         await InitializeAsync();
-        var repository = CreateRepository();
+        SqliteQuestionSourceRepository repository = CreateRepository();
         await repository.AddAsync("/notes/csharp", DateTimeOffset.UtcNow);
 
         Assert.True(await repository.ExistsAsync("/notes/csharp"));
@@ -74,7 +76,7 @@ public sealed class SourceRepositoryTests : IDisposable
         await InitializeAsync();
         await CreateRepository().AddAsync("/notes/csharp", DateTimeOffset.UtcNow);
 
-        var freshRepository = CreateRepository();
+        SqliteQuestionSourceRepository freshRepository = CreateRepository();
 
         Assert.Single(await freshRepository.GetAllAsync());
     }
@@ -82,7 +84,7 @@ public sealed class SourceRepositoryTests : IDisposable
     [Fact]
     public async Task Uninitialized_workspace_is_rejected_with_a_clear_error()
     {
-        var repository = CreateRepository();
+        SqliteQuestionSourceRepository repository = CreateRepository();
 
         await Assert.ThrowsAsync<WorkspaceNotInitializedException>(() => repository.GetAllAsync());
     }

@@ -1,5 +1,7 @@
 using System.ComponentModel;
 using RecallCommander.Application.Attempts;
+using RecallCommander.Contracts.Parsing;
+using RecallCommander.Domain;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -17,8 +19,8 @@ public sealed class AttemptValidateCommand(IAnsiConsole console, ValidateAttempt
 
     public override int Execute(CommandContext context, Settings settings)
     {
-        var result = attempts.Validate(settings.File);
-        var displayPath = Path.GetRelativePath(Environment.CurrentDirectory, result.FilePath);
+        ValidateAttemptResult result = attempts.Validate(settings.File);
+        string displayPath = Path.GetRelativePath(Environment.CurrentDirectory, result.FilePath);
 
         switch (result.Status)
         {
@@ -30,7 +32,7 @@ public sealed class AttemptValidateCommand(IAnsiConsole console, ValidateAttempt
                 console.MarkupLine("[red]Attempt is not valid.[/]");
                 console.WriteLine();
 
-                foreach (var diagnostic in result.Diagnostics)
+                foreach (ParseDiagnostic diagnostic in result.Diagnostics)
                 {
                     console.MarkupLineInterpolated($"[yellow]{displayPath}:{diagnostic.LineNumber}[/]");
                     console.WriteLine(diagnostic.Message);
@@ -40,7 +42,7 @@ public sealed class AttemptValidateCommand(IAnsiConsole console, ValidateAttempt
                 return 1;
 
             default:
-                var attempt = result.Attempt!;
+                Attempt attempt = result.Attempt!;
 
                 console.MarkupLine("[green]Attempt is valid.[/]");
                 console.WriteLine();

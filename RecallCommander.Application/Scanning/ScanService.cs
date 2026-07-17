@@ -1,6 +1,7 @@
 using RecallCommander.Contracts.FileSystem;
 using RecallCommander.Contracts.Questions;
 using RecallCommander.Contracts.Sources;
+using RecallCommander.Domain;
 
 namespace RecallCommander.Application.Scanning;
 
@@ -16,13 +17,13 @@ public sealed class ScanService(
 {
     public async Task<ScanReport> ScanAsync(CancellationToken cancellationToken = default)
     {
-        var sources = await repository.GetAllAsync(cancellationToken);
+        IReadOnlyList<QuestionSource> sources = await repository.GetAllAsync(cancellationToken);
 
-        var files = new List<ScannedFile>();
-        var warnings = new List<ScanWarning>();
-        var scannedPaths = new HashSet<string>(StringComparer.Ordinal);
+        List<ScannedFile> files = new List<ScannedFile>();
+        List<ScanWarning> warnings = new List<ScanWarning>();
+        HashSet<string> scannedPaths = new HashSet<string>(StringComparer.Ordinal);
 
-        foreach (var source in sources)
+        foreach (QuestionSource source in sources)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -32,7 +33,7 @@ public sealed class ScanService(
                 continue;
             }
 
-            foreach (var filePath in fileSystem.EnumerateMarkdownFiles(source.DirectoryPath))
+            foreach (string filePath in fileSystem.EnumerateMarkdownFiles(source.DirectoryPath))
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -42,7 +43,7 @@ public sealed class ScanService(
                     continue;
                 }
 
-                var displayPath = Path.GetRelativePath(source.DirectoryPath, filePath);
+                string displayPath = Path.GetRelativePath(source.DirectoryPath, filePath);
 
                 string markdown;
                 try
@@ -55,7 +56,7 @@ public sealed class ScanService(
                     continue;
                 }
 
-                var result = parser.Parse(markdown);
+                QuestionParseResult result = parser.Parse(markdown);
 
                 files.Add(new ScannedFile(displayPath, filePath, result.Questions));
                 warnings.AddRange(result.Diagnostics.Select(diagnostic =>

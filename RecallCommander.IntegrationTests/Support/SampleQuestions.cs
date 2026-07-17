@@ -13,7 +13,7 @@ public static class SampleQuestions
         string? answer = null,
         params string[] concepts)
     {
-        var builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         builder.AppendLine(":::rc-question");
         builder.AppendLine();
         builder.AppendLine($"type: {type}");
@@ -22,7 +22,7 @@ public static class SampleQuestions
         {
             builder.AppendLine();
             builder.AppendLine("concepts:");
-            foreach (var concept in concepts)
+            foreach (string concept in concepts)
             {
                 builder.AppendLine($"- {concept}");
             }

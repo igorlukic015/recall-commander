@@ -17,7 +17,7 @@ public sealed class StorageProviderDialogService(Func<TopLevel?> topLevelAccesso
             return null;
         }
 
-        var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        IReadOnlyList<IStorageFolder> folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             Title = title,
             AllowMultiple = false,
@@ -33,7 +33,7 @@ public sealed class StorageProviderDialogService(Func<TopLevel?> topLevelAccesso
             return null;
         }
 
-        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        IReadOnlyList<IStorageFile> files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = title,
             AllowMultiple = false,

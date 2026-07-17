@@ -1,5 +1,5 @@
-using Xunit;
 using RecallCommander.Application.Artifacts;
+using Xunit;
 
 namespace RecallCommander.Application.Tests.Artifacts;
 
@@ -13,7 +13,7 @@ public sealed class ArtifactFileNameGeneratorTests
     [Fact]
     public void Stem_combines_slug_and_date()
     {
-        var stem = _generator.CreateStem("assessment", Timestamp);
+        string stem = _generator.CreateStem("assessment", Timestamp);
 
         Assert.Equal("assessment-2026-07-16", stem);
     }
@@ -25,7 +25,7 @@ public sealed class ArtifactFileNameGeneratorTests
     [InlineData(1234, "assessment-2026-07-16-1234.md")]
     public void Numbered_file_name_appends_three_digit_sequence(int sequence, string expected)
     {
-        var fileName = _generator.CreateNumberedFileName("assessment-2026-07-16", sequence);
+        string fileName = _generator.CreateNumberedFileName("assessment-2026-07-16", sequence);
 
         Assert.Equal(expected, fileName);
     }
@@ -45,7 +45,7 @@ public sealed class ArtifactFileNameGeneratorTests
     [InlineData("--already--dashed--", "already-dashed")]
     public void Sanitizes_slug_to_filesystem_safe_form(string slug, string expectedStem)
     {
-        var stem = _generator.CreateStem(slug, Timestamp);
+        string stem = _generator.CreateStem(slug, Timestamp);
 
         Assert.Equal($"{expectedStem}-2026-07-16", stem);
     }
@@ -56,7 +56,7 @@ public sealed class ArtifactFileNameGeneratorTests
     [InlineData("///???")]
     public void Falls_back_when_slug_has_no_usable_characters(string slug)
     {
-        var stem = _generator.CreateStem(slug, Timestamp);
+        string stem = _generator.CreateStem(slug, Timestamp);
 
         Assert.Equal("artifact-2026-07-16", stem);
     }

@@ -24,11 +24,11 @@ public sealed class CreateAssessmentService(
         int? requestedCount = null,
         CancellationToken cancellationToken = default)
     {
-        var count = requestedCount ?? DefaultQuestionCount;
+        int count = requestedCount ?? DefaultQuestionCount;
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 1, nameof(requestedCount));
 
-        var report = await scanner.ScanAsync(cancellationToken);
-        var questions = report.Files
+        ScanReport report = await scanner.ScanAsync(cancellationToken);
+        List<Question> questions = report.Files
             .SelectMany(file => file.Questions)
             .Select(discovered => discovered.Question)
             .ToList();
@@ -38,15 +38,15 @@ public sealed class CreateAssessmentService(
             return CreateAssessmentResult.NoQuestions();
         }
 
-        var selected = selector.Select(questions, count);
-        var createdAt = timeProvider.GetUtcNow();
+        IReadOnlyList<Question> selected = selector.Select(questions, count);
+        DateTimeOffset createdAt = timeProvider.GetUtcNow();
 
-        var assessment = new Assessment(
+        Assessment assessment = new Assessment(
             $"Assessment {createdAt:yyyy-MM-dd}",
             createdAt,
             selected.Select(AssessmentQuestion.FromQuestion));
 
-        var saved = await writer.WriteAsync(assessment, cancellationToken);
+        SavedArtifact saved = await writer.WriteAsync(assessment, cancellationToken);
         return CreateAssessmentResult.Created(saved.FilePath, assessment.Questions.Count);
     }
 }

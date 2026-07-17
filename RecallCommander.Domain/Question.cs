@@ -47,15 +47,15 @@ public sealed class Question
             return [];
         }
 
-        var normalized = new List<string>();
-        foreach (var concept in concepts)
+        List<string> normalized = new List<string>();
+        foreach (string concept in concepts)
         {
             if (string.IsNullOrWhiteSpace(concept))
             {
                 throw new DomainException("A concept cannot be empty.");
             }
 
-            var trimmed = concept.Trim();
+            string trimmed = concept.Trim();
             if (!normalized.Contains(trimmed, StringComparer.Ordinal))
             {
                 normalized.Add(trimmed);

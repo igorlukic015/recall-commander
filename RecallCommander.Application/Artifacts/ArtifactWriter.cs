@@ -18,10 +18,10 @@ public sealed class ArtifactWriter<T>(
 {
     public async Task<SavedArtifact> WriteAsync(T artifact, CancellationToken cancellationToken = default)
     {
-        var stem = fileNames.CreateStem(renderer.Slug, timeProvider.GetUtcNow());
-        var directory = Path.Combine(outputPath.GetOutputDirectory(), renderer.DirectoryName);
+        string stem = fileNames.CreateStem(renderer.Slug, timeProvider.GetUtcNow());
+        string directory = Path.Combine(outputPath.GetOutputDirectory(), renderer.DirectoryName);
 
-        var filePath = await store.SaveAsync(
+        string filePath = await store.SaveAsync(
             directory,
             stem,
             artifactId => renderer.Render(artifact, artifactId),

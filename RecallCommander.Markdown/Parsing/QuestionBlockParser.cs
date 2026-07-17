@@ -29,7 +29,7 @@ public sealed class QuestionBlockParser : IQuestionBlockParser
 
     private static MarkdownPipeline CreatePipeline()
     {
-        var builder = new MarkdownPipelineBuilder();
+        MarkdownPipelineBuilder builder = new MarkdownPipelineBuilder();
         builder.BlockParsers.Insert(0, new RcContainerParser());
         return builder.Build();
     }
@@ -38,12 +38,12 @@ public sealed class QuestionBlockParser : IQuestionBlockParser
     {
         ArgumentNullException.ThrowIfNull(markdown);
 
-        var document = Markdig.Markdown.Parse(markdown, Pipeline);
+        MarkdownDocument document = Markdig.Markdown.Parse(markdown, Pipeline);
 
-        var questions = new List<DiscoveredQuestion>();
-        var diagnostics = new List<ParseDiagnostic>();
+        List<DiscoveredQuestion> questions = new List<DiscoveredQuestion>();
+        List<ParseDiagnostic> diagnostics = new List<ParseDiagnostic>();
 
-        foreach (var block in document)
+        foreach (Block block in document)
         {
             if (block is not RcContainerBlock container)
             {
@@ -73,14 +73,14 @@ public sealed class QuestionBlockParser : IQuestionBlockParser
         List<DiscoveredQuestion> questions,
         List<ParseDiagnostic> diagnostics)
     {
-        var questionLine = LineOf(questionContainer);
-        var errors = new List<ParseDiagnostic>();
+        int questionLine = LineOf(questionContainer);
+        List<ParseDiagnostic> errors = new List<ParseDiagnostic>();
 
-        var metadataBlocks = new List<Block>();
+        List<Block> metadataBlocks = new List<Block>();
         RcContainerBlock? promptContainer = null;
         RcContainerBlock? answerContainer = null;
 
-        foreach (var child in questionContainer)
+        foreach (Block child in questionContainer)
         {
             if (child is RcContainerBlock nested)
             {
@@ -112,7 +112,7 @@ public sealed class QuestionBlockParser : IQuestionBlockParser
             }
         }
 
-        var type = ParseMetadata(metadataBlocks, markdown, questionLine, errors, out var concepts);
+        QuestionType? type = ParseMetadata(metadataBlocks, markdown, questionLine, errors, out IReadOnlyList<string>? concepts);
 
         string? prompt = null;
         if (promptContainer is null)
@@ -172,14 +172,14 @@ public sealed class QuestionBlockParser : IQuestionBlockParser
         QuestionMetadata? metadata = null;
         if (metadataBlocks.Count > 0)
         {
-            var yaml = RawText(metadataBlocks[0], metadataBlocks[^1], markdown);
+            string yaml = RawText(metadataBlocks[0], metadataBlocks[^1], markdown);
             try
             {
                 metadata = MetadataDeserializer.Deserialize<QuestionMetadata>(yaml);
             }
             catch (YamlException exception)
             {
-                var line = metadataBlocks[0].Line + (int)exception.Start.Line;
+                int line = metadataBlocks[0].Line + (int)exception.Start.Line;
                 errors.Add(new ParseDiagnostic(line, $"Invalid metadata: {exception.InnerException?.Message ?? exception.Message}"));
                 return null;
             }
@@ -191,7 +191,7 @@ public sealed class QuestionBlockParser : IQuestionBlockParser
             return null;
         }
 
-        if (!Enum.TryParse<QuestionType>(metadata.Type, ignoreCase: true, out var type))
+        if (!Enum.TryParse<QuestionType>(metadata.Type, ignoreCase: true, out QuestionType type))
         {
             errors.Add(new ParseDiagnostic(
                 questionLine,
@@ -218,8 +218,8 @@ public sealed class QuestionBlockParser : IQuestionBlockParser
     /// <summary>Extracts the raw source text from the start of one block to the end of another.</summary>
     private static string RawText(Block first, Block last, string markdown)
     {
-        var start = first.Span.Start;
-        var end = last.Span.End;
+        int start = first.Span.Start;
+        int end = last.Span.End;
 
         if (start < 0 || end < start || end >= markdown.Length)
         {

@@ -1,6 +1,6 @@
-using Xunit;
 using RecallCommander.Application.Scanning;
 using RecallCommander.Application.Tests.Fakes;
+using Xunit;
 
 namespace RecallCommander.Application.Tests;
 
@@ -14,7 +14,7 @@ public sealed class ScanServiceTests
     [Fact]
     public async Task Empty_report_when_no_sources_registered()
     {
-        var report = await CreateService().ScanAsync();
+        ScanReport report = await CreateService().ScanAsync();
 
         Assert.Equal(0, report.SourceCount);
         Assert.Empty(report.Files);
@@ -33,7 +33,7 @@ public sealed class ScanServiceTests
             .AddFile("/notes/databases.md", "question")
             .AddFile("/vault/physics.md", "question");
 
-        var report = await CreateService().ScanAsync();
+        ScanReport report = await CreateService().ScanAsync();
 
         Assert.Equal(2, report.SourceCount);
         Assert.Equal(3, report.Files.Count);
@@ -49,9 +49,9 @@ public sealed class ScanServiceTests
             .AddDirectory("/notes")
             .AddFile("/notes/csharp/boxing.md", "question");
 
-        var report = await CreateService().ScanAsync();
+        ScanReport report = await CreateService().ScanAsync();
 
-        var file = Assert.Single(report.Files);
+        ScannedFile file = Assert.Single(report.Files);
         Assert.Equal("csharp/boxing.md", file.DisplayPath);
         Assert.Equal("/notes/csharp/boxing.md", file.FullPath);
     }
@@ -64,9 +64,9 @@ public sealed class ScanServiceTests
             .AddDirectory("/notes")
             .AddFile("/notes/physics.md", "question\nwarning:Missing rc-prompt");
 
-        var report = await CreateService().ScanAsync();
+        ScanReport report = await CreateService().ScanAsync();
 
-        var warning = Assert.Single(report.Warnings);
+        ScanWarning warning = Assert.Single(report.Warnings);
         Assert.Equal("physics.md", warning.DisplayPath);
         Assert.Equal(2, warning.LineNumber);
         Assert.Equal("Missing rc-prompt", warning.Message);
@@ -82,9 +82,9 @@ public sealed class ScanServiceTests
             .AddDirectory("/notes")
             .AddFile("/notes/csharp.md", "question");
 
-        var report = await CreateService().ScanAsync();
+        ScanReport report = await CreateService().ScanAsync();
 
-        var warning = Assert.Single(report.Warnings);
+        ScanWarning warning = Assert.Single(report.Warnings);
         Assert.Equal("/gone", warning.DisplayPath);
         Assert.Null(warning.LineNumber);
         Assert.Equal(1, report.TotalQuestions);
@@ -99,9 +99,9 @@ public sealed class ScanServiceTests
             .AddUnreadableFile("/notes/locked.md")
             .AddFile("/notes/open.md", "question");
 
-        var report = await CreateService().ScanAsync();
+        ScanReport report = await CreateService().ScanAsync();
 
-        var warning = Assert.Single(report.Warnings);
+        ScanWarning warning = Assert.Single(report.Warnings);
         Assert.Equal("locked.md", warning.DisplayPath);
         Assert.Contains("Could not read file", warning.Message);
         Assert.Equal(1, report.TotalQuestions);
@@ -117,7 +117,7 @@ public sealed class ScanServiceTests
             .AddDirectory("/notes/csharp")
             .AddFile("/notes/csharp/boxing.md", "question");
 
-        var report = await CreateService().ScanAsync();
+        ScanReport report = await CreateService().ScanAsync();
 
         Assert.Single(report.Files);
         Assert.Equal(1, report.TotalQuestions);

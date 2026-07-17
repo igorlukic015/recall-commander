@@ -1,6 +1,6 @@
-using Xunit;
 using RecallCommander.Application.Artifacts;
 using RecallCommander.Contracts.Artifacts;
+using Xunit;
 
 namespace RecallCommander.Application.Tests.Artifacts;
 
@@ -52,15 +52,15 @@ public sealed class ArtifactWriterTests
     [Fact]
     public async Task Names_renders_with_the_assigned_id_and_persists_the_artifact()
     {
-        var store = new RecordingStore();
-        var writer = new ArtifactWriter<TestArtifact>(
+        RecordingStore store = new RecordingStore();
+        ArtifactWriter<TestArtifact> writer = new ArtifactWriter<TestArtifact>(
             new TestRenderer(),
             store,
             new FixedOutputPath("/output"),
             new ArtifactFileNameGenerator(),
             new FixedTimeProvider(new DateTimeOffset(2026, 7, 16, 19, 30, 0, TimeSpan.Zero)));
 
-        var saved = await writer.WriteAsync(new TestArtifact("My Assessment"));
+        SavedArtifact saved = await writer.WriteAsync(new TestArtifact("My Assessment"));
 
         Assert.Equal(Path.Combine("/output", "TestArtifacts"), store.DirectoryPath);
         Assert.Equal("my-assessment-2026-07-16", store.FileNameStem);

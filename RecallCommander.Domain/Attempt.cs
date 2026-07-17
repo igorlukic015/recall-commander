@@ -1,3 +1,4 @@
+
 namespace RecallCommander.Domain;
 
 /// <summary>
@@ -33,7 +34,7 @@ public sealed class Attempt
             throw new DomainException("An attempt title cannot be empty.");
         }
 
-        var questionList = questions?.ToList() ?? throw new DomainException("An attempt requires questions.");
+        List<AttemptQuestion> questionList = questions?.ToList() ?? throw new DomainException("An attempt requires questions.");
         if (questionList.Count == 0)
         {
             throw new DomainException("An attempt requires at least one question.");

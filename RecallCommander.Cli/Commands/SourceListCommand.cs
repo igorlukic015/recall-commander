@@ -1,4 +1,5 @@
 using RecallCommander.Application.Sources;
+using RecallCommander.Domain;
 using Spectre.Console;
 using Spectre.Console.Cli;
 
@@ -8,7 +9,7 @@ public sealed class SourceListCommand(IAnsiConsole console, QuestionSourceServic
 {
     public override async Task<int> ExecuteAsync(CommandContext context)
     {
-        var all = await sources.ListAsync();
+        IReadOnlyList<QuestionSource> all = await sources.ListAsync();
 
         if (all.Count == 0)
         {
@@ -16,12 +17,12 @@ public sealed class SourceListCommand(IAnsiConsole console, QuestionSourceServic
             return 0;
         }
 
-        var table = new Table()
+        Table table = new Table()
             .AddColumn("Id")
             .AddColumn("Path")
             .AddColumn("Registered (UTC)");
 
-        foreach (var source in all)
+        foreach (QuestionSource source in all)
         {
             table.AddRow(
                 source.Id.ToString(),

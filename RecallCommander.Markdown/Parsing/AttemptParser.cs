@@ -39,13 +39,13 @@ public sealed class AttemptParser : IAttemptParser
     {
         ArgumentNullException.ThrowIfNull(markdown);
 
-        var document = Markdig.Markdown.Parse(markdown, Pipeline);
-        var diagnostics = new List<ParseDiagnostic>();
+        MarkdownDocument document = Markdig.Markdown.Parse(markdown, Pipeline);
+        List<ParseDiagnostic> diagnostics = new List<ParseDiagnostic>();
 
-        var createdAt = ParseFrontmatter(document, out var frontmatterTitle, out var assessmentId, diagnostics);
-        var questions = ParseQuestionSections(document, markdown, diagnostics, out var sectionCount);
+        DateTimeOffset? createdAt = ParseFrontmatter(document, out string? frontmatterTitle, out string? assessmentId, diagnostics);
+        List<AttemptQuestion> questions = ParseQuestionSections(document, markdown, diagnostics, out int sectionCount);
 
-        var title = frontmatterTitle ?? FirstTitleHeading(document);
+        string? title = frontmatterTitle ?? FirstTitleHeading(document);
         if (title is null)
         {
             diagnostics.Add(new ParseDiagnostic(1, "Missing title. Expected a 'title' frontmatter field or a level 1 heading."));
@@ -79,7 +79,7 @@ public sealed class AttemptParser : IAttemptParser
             return null;
         }
 
-        var line = LineOf(yaml);
+        int line = LineOf(yaml);
 
         AttemptFrontmatter? frontmatter;
         try
@@ -103,7 +103,7 @@ public sealed class AttemptParser : IAttemptParser
         // A Save As does not change the artifact type: an attempt keeps
         // 'type: assessment' and is an attempt because the user passed it
         // to the attempt parser.
-        var type = frontmatter.Type.Trim();
+        string type = frontmatter.Type.Trim();
         if (!type.Equals(AssessmentType, StringComparison.OrdinalIgnoreCase))
         {
             diagnostics.Add(new ParseDiagnostic(
@@ -131,7 +131,7 @@ public sealed class AttemptParser : IAttemptParser
                 TimestampFormat,
                 CultureInfo.InvariantCulture,
                 DateTimeStyles.AssumeUniversal,
-                out var createdAt))
+                out DateTimeOffset createdAt))
         {
             diagnostics.Add(new ParseDiagnostic(
                 line,
@@ -148,12 +148,12 @@ public sealed class AttemptParser : IAttemptParser
         List<ParseDiagnostic> diagnostics,
         out int sectionCount)
     {
-        var questions = new List<AttemptQuestion>();
+        List<AttemptQuestion> questions = new List<AttemptQuestion>();
         sectionCount = 0;
 
         QuestionSection? current = null;
 
-        foreach (var block in document)
+        foreach (Block block in document)
         {
             switch (block)
             {
@@ -225,10 +225,10 @@ public sealed class AttemptParser : IAttemptParser
             return;
         }
 
-        var line = LineOf(section.Heading);
-        var valid = true;
+        int line = LineOf(section.Heading);
+        bool valid = true;
 
-        var prompt = RawText(section.PromptBlocks, markdown).Trim();
+        string prompt = RawText(section.PromptBlocks, markdown).Trim();
         if (prompt.Length == 0)
         {
             diagnostics.Add(new ParseDiagnostic(line, "Question has no prompt text."));
@@ -257,13 +257,13 @@ public sealed class AttemptParser : IAttemptParser
 
     private static string? FirstTitleHeading(MarkdownDocument document)
     {
-        var heading = document.OfType<HeadingBlock>().FirstOrDefault(block => block.Level == 1);
+        HeadingBlock? heading = document.OfType<HeadingBlock>().FirstOrDefault(block => block.Level == 1);
         if (heading is null)
         {
             return null;
         }
 
-        var text = HeadingText(heading);
+        string text = HeadingText(heading);
         return text.Length == 0 ? null : text;
     }
 
@@ -276,9 +276,9 @@ public sealed class AttemptParser : IAttemptParser
 
     private static string? FirstNonEmpty(params ReadOnlySpan<string?> values)
     {
-        foreach (var value in values)
+        foreach (string? value in values)
         {
-            var trimmed = value?.Trim();
+            string? trimmed = value?.Trim();
             if (!string.IsNullOrEmpty(trimmed))
             {
                 return trimmed;
@@ -295,8 +295,8 @@ public sealed class AttemptParser : IAttemptParser
     /// <summary>Extracts the raw source text from the start of one block to the end of another.</summary>
     private static string RawText(Block first, Block last, string markdown)
     {
-        var start = first.Span.Start;
-        var end = last.Span.End;
+        int start = first.Span.Start;
+        int end = last.Span.End;
 
         if (start < 0 || end < start || end >= markdown.Length)
         {

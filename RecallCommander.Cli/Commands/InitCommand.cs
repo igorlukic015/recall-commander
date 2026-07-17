@@ -8,7 +8,7 @@ public sealed class InitCommand(IAnsiConsole console, IWorkspaceInitializer init
 {
     public override async Task<int> ExecuteAsync(CommandContext context)
     {
-        var result = await initializer.InitializeAsync();
+        InitializationResult result = await initializer.InitializeAsync();
 
         console.MarkupLine(result.Created
             ? "[green]Initialized Recall Commander workspace.[/]"

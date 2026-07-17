@@ -12,13 +12,13 @@ public sealed class FakeQuestionBlockParser : IQuestionBlockParser
 {
     public QuestionParseResult Parse(string markdown)
     {
-        var questions = new List<DiscoveredQuestion>();
-        var diagnostics = new List<ParseDiagnostic>();
+        List<DiscoveredQuestion> questions = new List<DiscoveredQuestion>();
+        List<ParseDiagnostic> diagnostics = new List<ParseDiagnostic>();
 
-        var lines = markdown.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        for (var index = 0; index < lines.Length; index++)
+        string[] lines = markdown.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        for (int index = 0; index < lines.Length; index++)
         {
-            var line = lines[index].Trim();
+            string line = lines[index].Trim();
             if (line == "question")
             {
                 questions.Add(new DiscoveredQuestion(

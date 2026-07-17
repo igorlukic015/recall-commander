@@ -1,5 +1,5 @@
-using Xunit;
 using RecallCommander.Markdown.Writing;
+using Xunit;
 
 namespace RecallCommander.Markdown.Tests;
 
@@ -15,7 +15,7 @@ public sealed class MarkdownArtifactBuilderTests
     [Fact]
     public void Builds_document_matching_the_artifact_model_example()
     {
-        var document = new MarkdownArtifactBuilder()
+        string document = new MarkdownArtifactBuilder()
             .WithFrontmatter(new AssessmentFrontmatter(
                 "assessment",
                 new DateTimeOffset(2026, 7, 13, 19, 30, 0, TimeSpan.Zero),
@@ -55,7 +55,7 @@ public sealed class MarkdownArtifactBuilderTests
     [Fact]
     public void Frontmatter_omits_null_fields()
     {
-        var document = new MarkdownArtifactBuilder()
+        string document = new MarkdownArtifactBuilder()
             .WithFrontmatter(new AssessmentFrontmatter(
                 "assessment",
                 new DateTimeOffset(2026, 7, 13, 19, 30, 0, TimeSpan.Zero),
@@ -71,7 +71,7 @@ public sealed class MarkdownArtifactBuilderTests
     [Fact]
     public void Document_without_frontmatter_starts_with_the_body()
     {
-        var document = new MarkdownArtifactBuilder()
+        string document = new MarkdownArtifactBuilder()
             .AppendHeading(1, "Title")
             .Build();
 
@@ -81,7 +81,7 @@ public sealed class MarkdownArtifactBuilderTests
     [Fact]
     public void Multiline_markdown_blocks_are_preserved()
     {
-        var document = new MarkdownArtifactBuilder()
+        string document = new MarkdownArtifactBuilder()
             .AppendMarkdown("Explain the following:\n\n- generations\n- the large object heap")
             .Build();
 
@@ -93,7 +93,7 @@ public sealed class MarkdownArtifactBuilderTests
     [InlineData(7)]
     public void Rejects_invalid_heading_levels(int level)
     {
-        var builder = new MarkdownArtifactBuilder();
+        MarkdownArtifactBuilder builder = new MarkdownArtifactBuilder();
 
         Assert.Throws<ArgumentOutOfRangeException>(() => builder.AppendHeading(level, "Title"));
     }

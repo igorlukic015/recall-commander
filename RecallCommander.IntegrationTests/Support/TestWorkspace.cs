@@ -38,7 +38,7 @@ public sealed class TestWorkspace : IDisposable
     /// <summary>Writes a Markdown file below Questions/, creating subdirectories as needed.</summary>
     public string WriteQuestionFile(string relativePath, string content)
     {
-        var path = Path.Combine(QuestionsDirectory, relativePath);
+        string path = Path.Combine(QuestionsDirectory, relativePath);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, content);
         return path;
@@ -47,14 +47,14 @@ public sealed class TestWorkspace : IDisposable
     /// <summary>Creates an additional source directory next to Questions/.</summary>
     public string CreateSourceDirectory(string name)
     {
-        var path = Path.Combine(Root, name);
+        string path = Path.Combine(Root, name);
         Directory.CreateDirectory(path);
         return path;
     }
 
     public string WriteFile(string absoluteDirectory, string fileName, string content)
     {
-        var path = Path.Combine(absoluteDirectory, fileName);
+        string path = Path.Combine(absoluteDirectory, fileName);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         File.WriteAllText(path, content);
         return path;

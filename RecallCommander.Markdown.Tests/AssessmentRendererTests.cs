@@ -1,6 +1,6 @@
-using Xunit;
 using RecallCommander.Domain;
 using RecallCommander.Markdown.Writing;
+using Xunit;
 
 namespace RecallCommander.Markdown.Tests;
 
@@ -16,14 +16,14 @@ public sealed class AssessmentRendererTests
     [Fact]
     public void Renders_the_documented_assessment_format()
     {
-        var assessment = new Assessment("C# Assessment", CreatedAt,
+        Assessment assessment = new Assessment("C# Assessment", CreatedAt,
         [
             new AssessmentQuestion("What is boxing in C#?"),
             new AssessmentQuestion("Explain how garbage collection works."),
             new AssessmentQuestion("Why can boxing negatively affect performance?"),
         ]);
 
-        var markdown = _renderer.Render(assessment, ArtifactId);
+        string markdown = _renderer.Render(assessment, ArtifactId);
 
         const string expected =
             """
@@ -71,9 +71,9 @@ public sealed class AssessmentRendererTests
     [Fact]
     public void Frontmatter_id_is_the_artifact_id_it_was_rendered_with()
     {
-        var assessment = new Assessment("Title", CreatedAt, [new AssessmentQuestion("Prompt?")]);
+        Assessment assessment = new Assessment("Title", CreatedAt, [new AssessmentQuestion("Prompt?")]);
 
-        var markdown = _renderer.Render(assessment, "assessment-2026-07-16-042");
+        string markdown = _renderer.Render(assessment, "assessment-2026-07-16-042");
 
         Assert.Contains("\nid: assessment-2026-07-16-042\n", markdown);
     }
@@ -88,10 +88,10 @@ public sealed class AssessmentRendererTests
     [Fact]
     public void Preserves_multiline_prompt_markdown()
     {
-        var prompt = "Explain garbage collection.\n\nYour answer should include:\n\n- generations\n- the large object heap";
-        var assessment = new Assessment("Title", CreatedAt, [new AssessmentQuestion(prompt)]);
+        string prompt = "Explain garbage collection.\n\nYour answer should include:\n\n- generations\n- the large object heap";
+        Assessment assessment = new Assessment("Title", CreatedAt, [new AssessmentQuestion(prompt)]);
 
-        var markdown = _renderer.Render(assessment, ArtifactId);
+        string markdown = _renderer.Render(assessment, ArtifactId);
 
         Assert.Contains(prompt, markdown);
     }

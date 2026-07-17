@@ -22,13 +22,13 @@ public static class CommandAppFactory
         Action<IServiceCollection>? configureServices = null,
         IAnsiConsole? console = null)
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new ServiceCollection();
         services.AddRecallCommanderApplication();
         services.AddRecallCommanderMarkdown();
         services.AddRecallCommanderInfrastructure();
         configureServices?.Invoke(services);
 
-        var app = new CommandApp(new TypeRegistrar(services));
+        CommandApp app = new CommandApp(new TypeRegistrar(services));
 
         app.Configure(config =>
         {
@@ -76,7 +76,7 @@ public static class CommandAppFactory
 
             config.SetExceptionHandler((exception, resolver) =>
             {
-                var console = resolver?.Resolve(typeof(IAnsiConsole)) as IAnsiConsole ?? AnsiConsole.Console;
+                IAnsiConsole console = resolver?.Resolve(typeof(IAnsiConsole)) as IAnsiConsole ?? AnsiConsole.Console;
 
                 if (exception is WorkspaceNotInitializedException or CommandRuntimeException)
                 {

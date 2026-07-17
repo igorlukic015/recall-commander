@@ -1,6 +1,8 @@
-using Xunit;
+using RecallCommander.Contracts.Parsing;
+using RecallCommander.Contracts.Questions;
 using RecallCommander.Domain;
 using RecallCommander.Markdown.Parsing;
+using Xunit;
 
 namespace RecallCommander.Markdown.Tests;
 
@@ -36,13 +38,13 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Diagnostics);
-        var discovered = Assert.Single(result.Questions);
+        DiscoveredQuestion discovered = Assert.Single(result.Questions);
         Assert.Equal(1, discovered.LineNumber);
 
-        var question = discovered.Question;
+        Question question = discovered.Question;
         Assert.Equal(QuestionType.Recall, question.Type);
         Assert.Equal("What is boxing in C#?", question.Prompt);
         Assert.Equal("Boxing converts a value type into an object.", question.ReferenceAnswer);
@@ -67,10 +69,10 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Diagnostics);
-        var question = Assert.Single(result.Questions).Question;
+        Question question = Assert.Single(result.Questions).Question;
         Assert.Equal(QuestionType.Synthesis, question.Type);
         Assert.Null(question.ReferenceAnswer);
     }
@@ -78,7 +80,7 @@ public sealed class QuestionBlockParserTests
     [Fact]
     public void Concepts_are_optional_and_default_to_empty()
     {
-        var result = _parser.Parse(QuestionBlock(type: "Explanation", prompt: "Explain GC."));
+        QuestionParseResult result = _parser.Parse(QuestionBlock(type: "Explanation", prompt: "Explain GC."));
 
         Assert.Empty(result.Diagnostics);
         Assert.Empty(Assert.Single(result.Questions).Question.Concepts);
@@ -110,7 +112,7 @@ public sealed class QuestionBlockParserTests
             More notes down here.
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Diagnostics);
         Assert.Single(result.Questions);
@@ -119,12 +121,12 @@ public sealed class QuestionBlockParserTests
     [Fact]
     public void Parses_multiple_question_blocks_in_one_document()
     {
-        var markdown =
+        string markdown =
             QuestionBlock(type: "Recall", prompt: "Question one?") +
             "\n\nSome prose between questions.\n\n" +
             QuestionBlock(type: "Explanation", prompt: "Question two?");
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Diagnostics);
         Assert.Equal(2, result.Questions.Count);
@@ -155,9 +157,9 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
-        var prompt = Assert.Single(result.Questions).Question.Prompt;
+        string prompt = Assert.Single(result.Questions).Question.Prompt;
         Assert.Contains("Explain garbage collection.", prompt);
         Assert.Contains("- generations", prompt);
         Assert.Contains("- the large object heap", prompt);
@@ -186,10 +188,10 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Diagnostics);
-        var prompt = Assert.Single(result.Questions).Question.Prompt;
+        string prompt = Assert.Single(result.Questions).Question.Prompt;
         Assert.Contains("var text = \":::\";", prompt);
     }
 
@@ -209,10 +211,10 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Questions);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(1, diagnostic.LineNumber);
         Assert.Contains("'type'", diagnostic.Message);
     }
@@ -220,10 +222,10 @@ public sealed class QuestionBlockParserTests
     [Fact]
     public void Unknown_type_reports_warning_and_skips_question()
     {
-        var result = _parser.Parse(QuestionBlock(type: "Trivia", prompt: "What is boxing?"));
+        QuestionParseResult result = _parser.Parse(QuestionBlock(type: "Trivia", prompt: "What is boxing?"));
 
         Assert.Empty(result.Questions);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Contains("Trivia", diagnostic.Message);
         Assert.Contains("Recall", diagnostic.Message);
     }
@@ -242,10 +244,10 @@ public sealed class QuestionBlockParserTests
             Unrelated paragraph.
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Questions);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Contains("Missing rc-prompt", diagnostic.Message);
     }
 
@@ -265,10 +267,10 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Questions);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Contains("empty", diagnostic.Message);
     }
 
@@ -290,10 +292,10 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Questions);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Contains("Invalid metadata", diagnostic.Message);
     }
 
@@ -321,32 +323,32 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Questions);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Contains("Duplicate rc-prompt", diagnostic.Message);
     }
 
     [Fact]
     public void Scanning_continues_after_an_invalid_block()
     {
-        var markdown =
+        string markdown =
             QuestionBlock(type: "Bogus", prompt: "Broken question?") +
             "\n\n" +
             QuestionBlock(type: "Recall", prompt: "Valid question?");
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Single(result.Diagnostics);
-        var question = Assert.Single(result.Questions).Question;
+        Question question = Assert.Single(result.Questions).Question;
         Assert.Equal("Valid question?", question.Prompt);
     }
 
     [Fact]
     public void Diagnostics_carry_the_line_number_of_the_failing_block()
     {
-        var markdown =
+        string markdown =
             "# Heading\n\nSome prose.\n\n" +                          // lines 1-4
             QuestionBlock(type: "Recall", prompt: "Fine?") + "\n\n" + // starts line 5
             """
@@ -357,10 +359,10 @@ public sealed class QuestionBlockParserTests
             :::
             """;                                                      // starts line 17
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Equal(5, Assert.Single(result.Questions).LineNumber);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(17, diagnostic.LineNumber);
     }
 
@@ -384,7 +386,7 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Diagnostics);
         Assert.Single(result.Questions);
@@ -414,7 +416,7 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Diagnostics);
         Assert.Single(result.Questions);
@@ -432,10 +434,10 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Questions);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Contains("outside", diagnostic.Message);
     }
 
@@ -461,7 +463,7 @@ public sealed class QuestionBlockParserTests
             :::
             """;
 
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Diagnostics);
         Assert.Null(Assert.Single(result.Questions).Question.ReferenceAnswer);
@@ -473,7 +475,7 @@ public sealed class QuestionBlockParserTests
     [InlineData("# Just notes\n\nNo questions here.")]
     public void Documents_without_question_blocks_yield_nothing(string markdown)
     {
-        var result = _parser.Parse(markdown);
+        QuestionParseResult result = _parser.Parse(markdown);
 
         Assert.Empty(result.Questions);
         Assert.Empty(result.Diagnostics);

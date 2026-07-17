@@ -1,3 +1,4 @@
+
 namespace RecallCommander.Domain;
 
 /// <summary>
@@ -20,7 +21,7 @@ public sealed class Assessment
             throw new DomainException("An assessment title cannot be empty.");
         }
 
-        var questionList = questions?.ToList() ?? throw new DomainException("An assessment requires questions.");
+        List<AssessmentQuestion> questionList = questions?.ToList() ?? throw new DomainException("An assessment requires questions.");
         if (questionList.Count == 0)
         {
             throw new DomainException("An assessment requires at least one question.");

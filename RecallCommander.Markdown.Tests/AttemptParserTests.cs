@@ -1,7 +1,9 @@
-using Xunit;
+using RecallCommander.Contracts.Attempts;
+using RecallCommander.Contracts.Parsing;
 using RecallCommander.Domain;
 using RecallCommander.Markdown.Parsing;
 using RecallCommander.Markdown.Writing;
+using Xunit;
 
 namespace RecallCommander.Markdown.Tests;
 
@@ -21,7 +23,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Parses_a_valid_attempt()
     {
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -40,14 +42,14 @@ public sealed class AttemptParserTests
             Boxing wraps a value type in an object on the heap.
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.True(result.IsValid);
         Assert.Empty(result.Diagnostics);
         Assert.Equal("C# Assessment", result.Attempt.Title);
         Assert.Equal(new DateTimeOffset(2026, 7, 17, 18, 0, 0, TimeSpan.Zero), result.Attempt.CreatedAtUtc);
 
-        var question = Assert.Single(result.Attempt.Questions);
+        AttemptQuestion question = Assert.Single(result.Attempt.Questions);
         Assert.Equal("What is boxing in C#?", question.Prompt);
         Assert.Equal("Boxing wraps a value type in an object on the heap.", question.Answer);
     }
@@ -55,7 +57,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Parses_multiple_questions_in_document_order()
     {
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -92,7 +94,7 @@ public sealed class AttemptParserTests
             Third answer.
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.True(result.IsValid);
         Assert.Equal(
@@ -106,7 +108,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Preserves_multiline_answers()
     {
-        var answer =
+        string answer =
             """
             Boxing converts a value type into an object.
 
@@ -115,7 +117,7 @@ public sealed class AttemptParserTests
             Unboxing extracts the value back out.
             """;
 
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -128,7 +130,7 @@ public sealed class AttemptParserTests
             {answer}
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.True(result.IsValid);
         Assert.Equal(answer, Assert.Single(result.Attempt.Questions).Answer);
@@ -137,7 +139,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Preserves_markdown_inside_answers()
     {
-        var answer =
+        string answer =
             """
             Boxing has **two** costs:
 
@@ -151,7 +153,7 @@ public sealed class AttemptParserTests
             ```
             """;
 
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -164,7 +166,7 @@ public sealed class AttemptParserTests
             {answer}
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.True(result.IsValid);
         Assert.Equal(answer, Assert.Single(result.Attempt.Questions).Answer);
@@ -173,7 +175,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Empty_answers_are_valid()
     {
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -192,7 +194,7 @@ public sealed class AttemptParserTests
             ### Answer
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.True(result.IsValid);
         Assert.All(result.Attempt.Questions, question =>
@@ -205,7 +207,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Missing_answer_heading_is_an_error()
     {
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -214,10 +216,10 @@ public sealed class AttemptParserTests
             What is boxing in C#?
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.False(result.IsValid);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(7, diagnostic.LineNumber);
         Assert.Contains("Missing '### Answer' heading", diagnostic.Message);
     }
@@ -225,7 +227,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Collects_every_error_instead_of_stopping_at_the_first()
     {
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -240,7 +242,7 @@ public sealed class AttemptParserTests
             Second prompt?
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.False(result.IsValid);
         Assert.Equal(2, result.Diagnostics.Count);
@@ -251,7 +253,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Missing_frontmatter_is_an_error()
     {
-        var markdown =
+        string markdown =
             """
             # C# Assessment
 
@@ -262,10 +264,10 @@ public sealed class AttemptParserTests
             ### Answer
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.False(result.IsValid);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(1, diagnostic.LineNumber);
         Assert.Contains("Missing assessment frontmatter", diagnostic.Message);
     }
@@ -273,7 +275,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Unexpected_document_type_is_an_error()
     {
-        var markdown =
+        string markdown =
             """
             ---
             type: review
@@ -288,7 +290,7 @@ public sealed class AttemptParserTests
             ### Answer
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.False(result.IsValid);
         Assert.Contains(result.Diagnostics, diagnostic =>
@@ -298,7 +300,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Missing_created_timestamp_is_an_error()
     {
-        var markdown =
+        string markdown =
             """
             ---
             type: assessment
@@ -312,7 +314,7 @@ public sealed class AttemptParserTests
             ### Answer
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.False(result.IsValid);
         Assert.Contains(result.Diagnostics, diagnostic =>
@@ -322,7 +324,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Invalid_created_timestamp_is_an_error()
     {
-        var markdown =
+        string markdown =
             """
             ---
             type: assessment
@@ -337,7 +339,7 @@ public sealed class AttemptParserTests
             ### Answer
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.False(result.IsValid);
         Assert.Contains(result.Diagnostics, diagnostic =>
@@ -347,7 +349,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Document_without_questions_is_an_error()
     {
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -356,7 +358,7 @@ public sealed class AttemptParserTests
             No questions here.
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.False(result.IsValid);
         Assert.Contains(result.Diagnostics, diagnostic =>
@@ -366,7 +368,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Question_without_prompt_text_is_an_error()
     {
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -377,10 +379,10 @@ public sealed class AttemptParserTests
             An answer without a question.
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.False(result.IsValid);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(7, diagnostic.LineNumber);
         Assert.Contains("no prompt text", diagnostic.Message);
     }
@@ -388,7 +390,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Answer_heading_outside_a_question_is_an_error()
     {
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -403,10 +405,10 @@ public sealed class AttemptParserTests
             ### Answer
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.False(result.IsValid);
-        var diagnostic = Assert.Single(result.Diagnostics);
+        ParseDiagnostic diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal(7, diagnostic.LineNumber);
         Assert.Contains("outside a question section", diagnostic.Message);
     }
@@ -414,7 +416,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Falls_back_to_the_heading_title_when_frontmatter_has_none()
     {
-        var markdown =
+        string markdown =
             """
             ---
             type: assessment
@@ -432,7 +434,7 @@ public sealed class AttemptParserTests
             Boxing is when a value type is converted into an object.
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.True(result.IsValid);
         Assert.Equal("C# Memory Management Assessment", result.Attempt.Title);
@@ -441,7 +443,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Missing_title_everywhere_is_an_error()
     {
-        var markdown =
+        string markdown =
             """
             ---
             type: assessment
@@ -455,7 +457,7 @@ public sealed class AttemptParserTests
             ### Answer
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.False(result.IsValid);
         Assert.Contains(result.Diagnostics, diagnostic => diagnostic.Message.Contains("Missing title"));
@@ -464,7 +466,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void A_second_answer_heading_belongs_to_the_answer_content()
     {
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -481,10 +483,10 @@ public sealed class AttemptParserTests
             Second part.
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.True(result.IsValid);
-        var question = Assert.Single(result.Attempt.Questions);
+        AttemptQuestion question = Assert.Single(result.Attempt.Questions);
         Assert.Contains("First part.", question.Answer);
         Assert.Contains("Second part.", question.Answer);
     }
@@ -492,7 +494,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void A_generated_assessment_round_trips_into_an_unanswered_attempt()
     {
-        var assessment = new Assessment(
+        Assessment assessment = new Assessment(
             "C# Assessment",
             new DateTimeOffset(2026, 7, 17, 18, 0, 0, TimeSpan.Zero),
             [
@@ -500,8 +502,8 @@ public sealed class AttemptParserTests
                 new AssessmentQuestion("Explain garbage collection generations."),
             ]);
 
-        var rendered = new AssessmentRenderer().Render(assessment, "assessment-2026-07-17-001");
-        var result = _parser.Parse(rendered);
+        string rendered = new AssessmentRenderer().Render(assessment, "assessment-2026-07-17-001");
+        AttemptParseResult result = _parser.Parse(rendered);
 
         Assert.True(result.IsValid);
         Assert.Equal(assessment.Title, result.Attempt.Title);
@@ -516,7 +518,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Accepts_the_full_generated_assessment_metadata()
     {
-        var markdown =
+        string markdown =
             """
             ---
             type: assessment
@@ -535,7 +537,7 @@ public sealed class AttemptParserTests
             Boxing wraps a value type in an object.
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.True(result.IsValid);
         Assert.Empty(result.Diagnostics);
@@ -545,7 +547,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void An_explicit_assessment_reference_is_the_assessment_identity()
     {
-        var markdown =
+        string markdown =
             """
             ---
             type: assessment
@@ -564,7 +566,7 @@ public sealed class AttemptParserTests
             An answer.
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.True(result.IsValid);
         Assert.Equal("assessment-2026-07-17-001", result.Attempt.AssessmentId);
@@ -573,7 +575,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void An_explicit_assessment_reference_wins_over_the_id_field()
     {
-        var markdown =
+        string markdown =
             """
             ---
             type: assessment
@@ -590,7 +592,7 @@ public sealed class AttemptParserTests
             ### Answer
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.True(result.IsValid);
         Assert.Equal("assessment-2026-07-17-001", result.Attempt.AssessmentId);
@@ -599,7 +601,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void Assessment_identity_is_optional()
     {
-        var markdown =
+        string markdown =
             $"""
             {Frontmatter}
 
@@ -610,7 +612,7 @@ public sealed class AttemptParserTests
             ### Answer
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.True(result.IsValid);
         Assert.Null(result.Attempt.AssessmentId);
@@ -619,7 +621,7 @@ public sealed class AttemptParserTests
     [Fact]
     public void The_assessment_attempt_type_is_not_supported()
     {
-        var markdown =
+        string markdown =
             """
             ---
             type: assessment-attempt
@@ -634,7 +636,7 @@ public sealed class AttemptParserTests
             ### Answer
             """;
 
-        var result = _parser.Parse(markdown);
+        AttemptParseResult result = _parser.Parse(markdown);
 
         Assert.False(result.IsValid);
         Assert.Contains(result.Diagnostics, diagnostic =>

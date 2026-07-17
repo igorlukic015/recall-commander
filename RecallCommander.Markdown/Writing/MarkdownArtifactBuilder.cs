@@ -40,7 +40,7 @@ public sealed class MarkdownArtifactBuilder
 
     public string Build()
     {
-        var document = new StringBuilder();
+        StringBuilder document = new StringBuilder();
 
         if (_frontmatter is not null)
         {

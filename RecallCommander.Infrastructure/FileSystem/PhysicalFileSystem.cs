@@ -12,7 +12,7 @@ public sealed class PhysicalFileSystem : IFileSystem
 
     public string NormalizePath(string path)
     {
-        var expanded = ExpandHome(path.Trim());
+        string expanded = ExpandHome(path.Trim());
         return Path.TrimEndingDirectorySeparator(Path.GetFullPath(expanded));
     }
 
@@ -30,7 +30,7 @@ public sealed class PhysicalFileSystem : IFileSystem
     {
         if (path == "~" || path.StartsWith("~/", StringComparison.Ordinal))
         {
-            var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             return Path.Combine(home, path.TrimStart('~', '/'));
         }
 

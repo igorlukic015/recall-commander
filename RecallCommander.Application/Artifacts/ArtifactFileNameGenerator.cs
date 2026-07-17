@@ -29,10 +29,10 @@ public sealed class ArtifactFileNameGenerator
 
     private static string Sanitize(string slug)
     {
-        var builder = new StringBuilder(slug.Length);
-        var previousWasDash = true; // suppresses leading dashes
+        StringBuilder builder = new StringBuilder(slug.Length);
+        bool previousWasDash = true; // suppresses leading dashes
 
-        foreach (var character in slug.Trim().ToLowerInvariant())
+        foreach (char character in slug.Trim().ToLowerInvariant())
         {
             if (char.IsAsciiLetterOrDigit(character))
             {
@@ -46,7 +46,7 @@ public sealed class ArtifactFileNameGenerator
             }
         }
 
-        var sanitized = builder.ToString().TrimEnd('-');
+        string sanitized = builder.ToString().TrimEnd('-');
         return sanitized.Length > 0 ? sanitized : FallbackSlug;
     }
 }

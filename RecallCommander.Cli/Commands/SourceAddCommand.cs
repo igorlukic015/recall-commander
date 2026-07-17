@@ -17,7 +17,7 @@ public sealed class SourceAddCommand(IAnsiConsole console, QuestionSourceService
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        var result = await sources.AddAsync(settings.Path);
+        AddSourceResult result = await sources.AddAsync(settings.Path);
 
         switch (result.Status)
         {

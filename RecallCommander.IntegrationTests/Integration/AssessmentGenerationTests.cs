@@ -1,4 +1,3 @@
-using Xunit;
 using RecallCommander.Application.Artifacts;
 using RecallCommander.Application.Assessments;
 using RecallCommander.Application.Scanning;
@@ -8,6 +7,7 @@ using RecallCommander.Infrastructure.FileSystem;
 using RecallCommander.IntegrationTests.Support;
 using RecallCommander.Markdown.Parsing;
 using RecallCommander.Markdown.Writing;
+using Xunit;
 
 namespace RecallCommander.IntegrationTests.Integration;
 
@@ -26,10 +26,10 @@ public sealed class AssessmentGenerationTests : IDisposable
 
     private CreateAssessmentService CreateService()
     {
-        var fileNames = new ArtifactFileNameGenerator();
-        var timeProvider = new FixedTimeProvider(Now);
+        ArtifactFileNameGenerator fileNames = new ArtifactFileNameGenerator();
+        FixedTimeProvider timeProvider = new FixedTimeProvider(Now);
 
-        var writer = new ArtifactWriter<Assessment>(
+        ArtifactWriter<Assessment> writer = new ArtifactWriter<Assessment>(
             new AssessmentRenderer(),
             new ArtifactFileStore(fileNames),
             new FixedArtifactOutputPathProvider(_workspace.Root),
@@ -57,7 +57,7 @@ public sealed class AssessmentGenerationTests : IDisposable
     {
         AddSampleQuestions();
 
-        var result = await CreateService().CreateAsync(requestedCount: 3);
+        CreateAssessmentResult result = await CreateService().CreateAsync(requestedCount: 3);
 
         Assert.Equal(CreateAssessmentStatus.Created, result.Status);
         Assert.Equal(
@@ -71,8 +71,8 @@ public sealed class AssessmentGenerationTests : IDisposable
     {
         AddSampleQuestions();
 
-        var result = await CreateService().CreateAsync(requestedCount: 3);
-        var document = await File.ReadAllTextAsync(result.FilePath!);
+        CreateAssessmentResult result = await CreateService().CreateAsync(requestedCount: 3);
+        string document = await File.ReadAllTextAsync(result.FilePath!);
 
         Assert.StartsWith("---\n", document);
         Assert.Contains("type: assessment", document);
@@ -93,10 +93,10 @@ public sealed class AssessmentGenerationTests : IDisposable
     {
         AddSampleQuestions();
 
-        var result = await CreateService().CreateAsync(requestedCount: 5);
-        var document = await File.ReadAllTextAsync(result.FilePath!);
+        CreateAssessmentResult result = await CreateService().CreateAsync(requestedCount: 5);
+        string document = await File.ReadAllTextAsync(result.FilePath!);
 
-        var body = document[document.IndexOf("# Assessment", StringComparison.Ordinal)..];
+        string body = document[document.IndexOf("# Assessment", StringComparison.Ordinal)..];
         Assert.DoesNotContain(":::", body);
         Assert.DoesNotContain("concepts", body);
         Assert.DoesNotContain("type:", body);
@@ -107,7 +107,7 @@ public sealed class AssessmentGenerationTests : IDisposable
     public async Task Selected_prompts_come_from_the_scanned_sources()
     {
         AddSampleQuestions();
-        var knownPrompts = new[]
+        string[] knownPrompts = new[]
         {
             "What is boxing in C#?",
             "Explain how garbage collection works in .NET.",
@@ -116,8 +116,8 @@ public sealed class AssessmentGenerationTests : IDisposable
             "Explain how JIT compilation works.",
         };
 
-        var result = await CreateService().CreateAsync(requestedCount: 5);
-        var document = await File.ReadAllTextAsync(result.FilePath!);
+        CreateAssessmentResult result = await CreateService().CreateAsync(requestedCount: 5);
+        string document = await File.ReadAllTextAsync(result.FilePath!);
 
         Assert.All(knownPrompts, prompt => Assert.Contains(prompt, document));
     }
@@ -126,10 +126,10 @@ public sealed class AssessmentGenerationTests : IDisposable
     public async Task Sequence_number_increments_for_assessments_created_the_same_day()
     {
         AddSampleQuestions();
-        var service = CreateService();
+        CreateAssessmentService service = CreateService();
 
-        var first = await service.CreateAsync(requestedCount: 2);
-        var second = await service.CreateAsync(requestedCount: 2);
+        CreateAssessmentResult first = await service.CreateAsync(requestedCount: 2);
+        CreateAssessmentResult second = await service.CreateAsync(requestedCount: 2);
 
         Assert.EndsWith("assessment-2026-07-16-001.md", first.FilePath);
         Assert.EndsWith("assessment-2026-07-16-002.md", second.FilePath);
@@ -139,15 +139,15 @@ public sealed class AssessmentGenerationTests : IDisposable
     public async Task Frontmatter_id_matches_the_generated_file_name()
     {
         AddSampleQuestions();
-        var service = CreateService();
+        CreateAssessmentService service = CreateService();
 
-        var first = await service.CreateAsync(requestedCount: 2);
-        var second = await service.CreateAsync(requestedCount: 2);
+        CreateAssessmentResult first = await service.CreateAsync(requestedCount: 2);
+        CreateAssessmentResult second = await service.CreateAsync(requestedCount: 2);
 
-        foreach (var result in new[] { first, second })
+        foreach (CreateAssessmentResult? result in new[] { first, second })
         {
-            var expectedId = Path.GetFileNameWithoutExtension(result.FilePath!);
-            var document = await File.ReadAllTextAsync(result.FilePath!);
+            string expectedId = Path.GetFileNameWithoutExtension(result.FilePath!);
+            string document = await File.ReadAllTextAsync(result.FilePath!);
             Assert.Contains($"\nid: {expectedId}\n", document);
         }
     }
@@ -157,10 +157,10 @@ public sealed class AssessmentGenerationTests : IDisposable
     {
         AddSampleQuestions();
 
-        var result = await CreateService().CreateAsync(requestedCount: 3);
+        CreateAssessmentResult result = await CreateService().CreateAsync(requestedCount: 3);
         Directory.Delete(_workspace.QuestionsDirectory, recursive: true);
 
-        var document = await File.ReadAllTextAsync(result.FilePath!);
+        string document = await File.ReadAllTextAsync(result.FilePath!);
         Assert.Contains("## Question 3", document);
     }
 }

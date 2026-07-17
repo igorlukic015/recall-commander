@@ -21,7 +21,7 @@ public sealed class SqliteConnectionFactory(IDataPaths dataPaths) : ISqliteConne
             throw new WorkspaceNotInitializedException();
         }
 
-        var connection = new SqliteConnection($"Data Source={dataPaths.DatabasePath}");
+        SqliteConnection connection = new SqliteConnection($"Data Source={dataPaths.DatabasePath}");
         connection.Open();
         return connection;
     }

@@ -6,6 +6,7 @@ using RecallCommander.Application.Assessments;
 using RecallCommander.Application.Attempts;
 using RecallCommander.Application.Scanning;
 using RecallCommander.Application.Sources;
+using RecallCommander.Contracts.Parsing;
 using RecallCommander.Contracts.Workspace;
 using RecallCommander.Domain;
 using RecallCommander.Workbench.Services;
@@ -49,7 +50,7 @@ public partial class MainWindowViewModel(
     {
         try
         {
-            var result = await workspaceInitializer.InitializeAsync();
+            InitializationResult result = await workspaceInitializer.InitializeAsync();
             AppendOutput(result.Created
                 ? "Initialized Recall Commander workspace."
                 : "Workspace is already initialized.");
@@ -68,13 +69,13 @@ public partial class MainWindowViewModel(
     {
         try
         {
-            var path = await dialogs.PickFolderAsync("Select a question source directory");
+            string? path = await dialogs.PickFolderAsync("Select a question source directory");
             if (path is null)
             {
                 return;
             }
 
-            var result = await sources.AddAsync(path);
+            AddSourceResult result = await sources.AddAsync(path);
 
             AppendOutput(result.Status switch
             {
@@ -101,7 +102,7 @@ public partial class MainWindowViewModel(
         {
             AppendOutput("Scanning...");
 
-            var report = await scanner.ScanAsync();
+            ScanReport report = await scanner.ScanAsync();
 
             if (report.SourceCount == 0)
             {
@@ -109,7 +110,7 @@ public partial class MainWindowViewModel(
                 return;
             }
 
-            foreach (var warning in report.Warnings)
+            foreach (ScanWarning warning in report.Warnings)
             {
                 AppendOutput($"Warning: {warning.Location} — {warning.Message}");
             }
@@ -142,7 +143,7 @@ public partial class MainWindowViewModel(
                 return;
             }
 
-            var result = await assessments.CreateAsync((int)count);
+            CreateAssessmentResult result = await assessments.CreateAsync((int)count);
 
             if (result.Status == CreateAssessmentStatus.NoQuestionsFound)
             {
@@ -150,7 +151,7 @@ public partial class MainWindowViewModel(
                 return;
             }
 
-            var displayPath = Path.GetRelativePath(Environment.CurrentDirectory, result.FilePath!);
+            string displayPath = Path.GetRelativePath(Environment.CurrentDirectory, result.FilePath!);
             AppendOutput(
                 $"""
                  Assessment created.
@@ -173,7 +174,7 @@ public partial class MainWindowViewModel(
     {
         try
         {
-            var path = await dialogs.PickFileAsync(
+            string? path = await dialogs.PickFileAsync(
                 "Select a completed assessment file",
                 "Markdown files",
                 ["*.md"]);
@@ -183,7 +184,7 @@ public partial class MainWindowViewModel(
                 return;
             }
 
-            var result = attempts.Validate(path);
+            ValidateAttemptResult result = attempts.Validate(path);
 
             switch (result.Status)
             {
@@ -193,7 +194,7 @@ public partial class MainWindowViewModel(
 
                 case ValidateAttemptStatus.Invalid:
                     AppendOutput("Attempt is not valid.");
-                    foreach (var diagnostic in result.Diagnostics)
+                    foreach (ParseDiagnostic diagnostic in result.Diagnostics)
                     {
                         AppendOutput($"  {result.FilePath}:{diagnostic.LineNumber} — {diagnostic.Message}");
                     }
@@ -201,7 +202,7 @@ public partial class MainWindowViewModel(
                     break;
 
                 default:
-                    var attempt = result.Attempt!;
+                    Attempt attempt = result.Attempt!;
                     AppendOutput("Attempt is valid.");
                     AppendOutput($"  Title: {attempt.Title}");
                     AppendOutput($"  Questions: {attempt.Questions.Count}");
@@ -217,10 +218,10 @@ public partial class MainWindowViewModel(
 
     private async Task ReloadSourcesAsync()
     {
-        var all = await sources.ListAsync();
+        IReadOnlyList<QuestionSource> all = await sources.ListAsync();
 
         Sources.Clear();
-        foreach (var source in all)
+        foreach (QuestionSource source in all)
         {
             Sources.Add(source);
         }

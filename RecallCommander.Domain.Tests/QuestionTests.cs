@@ -1,5 +1,5 @@
-using Xunit;
 using RecallCommander.Domain;
+using Xunit;
 
 namespace RecallCommander.Domain.Tests;
 
@@ -8,7 +8,7 @@ public sealed class QuestionTests
     [Fact]
     public void Creates_question_with_all_fields()
     {
-        var question = new Question(
+        Question question = new Question(
             QuestionType.Recall,
             "What is boxing?",
             "Boxing converts a value type into an object.",
@@ -23,7 +23,7 @@ public sealed class QuestionTests
     [Fact]
     public void Answer_and_concepts_are_optional()
     {
-        var question = new Question(QuestionType.Synthesis, "How do concepts connect?");
+        Question question = new Question(QuestionType.Synthesis, "How do concepts connect?");
 
         Assert.Null(question.ReferenceAnswer);
         Assert.Empty(question.Concepts);
@@ -54,7 +54,7 @@ public sealed class QuestionTests
     [Fact]
     public void Trims_prompt_answer_and_concepts()
     {
-        var question = new Question(
+        Question question = new Question(
             QuestionType.Recall,
             "  What is boxing?  ",
             "  An answer.  ",
@@ -68,7 +68,7 @@ public sealed class QuestionTests
     [Fact]
     public void Removes_duplicate_concepts()
     {
-        var question = new Question(
+        Question question = new Question(
             QuestionType.Recall,
             "What is boxing?",
             concepts: ["Boxing", "Boxing", "Heap"]);

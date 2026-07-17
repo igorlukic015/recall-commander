@@ -22,7 +22,7 @@ public sealed class AssessmentCreateCommand(IAnsiConsole console, CreateAssessme
 
     public override async Task<int> ExecuteAsync(CommandContext context, Settings settings)
     {
-        var result = await assessments.CreateAsync(settings.Count);
+        CreateAssessmentResult result = await assessments.CreateAsync(settings.Count);
 
         if (result.Status == CreateAssessmentStatus.NoQuestionsFound)
         {
@@ -30,7 +30,7 @@ public sealed class AssessmentCreateCommand(IAnsiConsole console, CreateAssessme
             return 1;
         }
 
-        var displayPath = Path.GetRelativePath(Environment.CurrentDirectory, result.FilePath!);
+        string displayPath = Path.GetRelativePath(Environment.CurrentDirectory, result.FilePath!);
 
         console.MarkupLine("[green]Assessment created.[/]");
         console.WriteLine();

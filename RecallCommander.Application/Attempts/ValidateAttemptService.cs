@@ -14,14 +14,14 @@ public sealed class ValidateAttemptService(IFileSystem fileSystem, IAttemptParse
 {
     public ValidateAttemptResult Validate(string path)
     {
-        var filePath = fileSystem.NormalizePath(path);
+        string filePath = fileSystem.NormalizePath(path);
 
         if (!fileSystem.FileExists(filePath))
         {
             return ValidateAttemptResult.FileNotFound(filePath);
         }
 
-        var result = parser.Parse(fileSystem.ReadAllText(filePath));
+        AttemptParseResult result = parser.Parse(fileSystem.ReadAllText(filePath));
 
         return result.IsValid
             ? ValidateAttemptResult.Valid(filePath, result.Attempt)

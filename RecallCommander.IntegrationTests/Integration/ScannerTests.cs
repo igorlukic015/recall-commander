@@ -1,8 +1,8 @@
-using Xunit;
 using RecallCommander.Application.Scanning;
 using RecallCommander.Infrastructure.FileSystem;
 using RecallCommander.IntegrationTests.Support;
 using RecallCommander.Markdown.Parsing;
+using Xunit;
 
 namespace RecallCommander.IntegrationTests.Integration;
 
@@ -17,7 +17,7 @@ public sealed class ScannerTests : IDisposable
 
     private Task<ScanReport> ScanAsync(params string[] sourceDirectories)
     {
-        var service = new ScanService(
+        ScanService service = new ScanService(
             new StubQuestionSourceRepository(sourceDirectories),
             new PhysicalFileSystem(),
             new QuestionBlockParser());
@@ -31,7 +31,7 @@ public sealed class ScannerTests : IDisposable
         _workspace.WriteQuestionFile("nested/dotnet.md", SampleQuestions.DotNetFile());
         _workspace.WriteQuestionFile("nested/deeper/more.md", SampleQuestions.Recall("Deep question?"));
 
-        var report = await ScanAsync(_workspace.QuestionsDirectory);
+        ScanReport report = await ScanAsync(_workspace.QuestionsDirectory);
 
         Assert.Empty(report.Warnings);
         Assert.Equal(6, report.TotalQuestions);
@@ -42,10 +42,10 @@ public sealed class ScannerTests : IDisposable
     public async Task Scans_multiple_source_folders()
     {
         _workspace.WriteQuestionFile("csharp.md", SampleQuestions.CSharpFile());
-        var secondSource = _workspace.CreateSourceDirectory("MoreQuestions");
+        string secondSource = _workspace.CreateSourceDirectory("MoreQuestions");
         _workspace.WriteFile(secondSource, "physics.md", SampleQuestions.Recall("What is inertia?"));
 
-        var report = await ScanAsync(_workspace.QuestionsDirectory, secondSource);
+        ScanReport report = await ScanAsync(_workspace.QuestionsDirectory, secondSource);
 
         Assert.Equal(4, report.TotalQuestions);
         Assert.Contains(report.Files, file => file.DisplayPath == "physics.md");
@@ -56,7 +56,7 @@ public sealed class ScannerTests : IDisposable
     {
         _workspace.WriteQuestionFile("notes.md", SampleQuestions.PlainNotesFile());
 
-        var report = await ScanAsync(_workspace.QuestionsDirectory);
+        ScanReport report = await ScanAsync(_workspace.QuestionsDirectory);
 
         Assert.Empty(report.Warnings);
         Assert.Equal(0, report.TotalQuestions);
@@ -67,7 +67,7 @@ public sealed class ScannerTests : IDisposable
     {
         _workspace.WriteQuestionFile("questions.txt", SampleQuestions.Recall("Hidden in a txt file?"));
 
-        var report = await ScanAsync(_workspace.QuestionsDirectory);
+        ScanReport report = await ScanAsync(_workspace.QuestionsDirectory);
 
         Assert.Empty(report.Files);
         Assert.Equal(0, report.TotalQuestions);
@@ -78,7 +78,7 @@ public sealed class ScannerTests : IDisposable
     {
         _workspace.WriteQuestionFile("mixed.md", SampleQuestions.FileWithMalformedBlocks());
 
-        var report = await ScanAsync(_workspace.QuestionsDirectory);
+        ScanReport report = await ScanAsync(_workspace.QuestionsDirectory);
 
         Assert.Equal(2, report.TotalQuestions);
         Assert.Equal(3, report.Warnings.Count);
@@ -99,7 +99,7 @@ public sealed class ScannerTests : IDisposable
         _workspace.WriteQuestionFile("a-broken.md", SampleQuestions.MissingPromptBlock());
         _workspace.WriteQuestionFile("b-valid.md", SampleQuestions.Recall("Still discovered?"));
 
-        var report = await ScanAsync(_workspace.QuestionsDirectory);
+        ScanReport report = await ScanAsync(_workspace.QuestionsDirectory);
 
         Assert.Single(report.Warnings);
         Assert.Equal(1, report.TotalQuestions);
@@ -109,11 +109,11 @@ public sealed class ScannerTests : IDisposable
     public async Task Reports_missing_source_directory_and_scans_the_rest()
     {
         _workspace.WriteQuestionFile("csharp.md", SampleQuestions.Recall("What is boxing?"));
-        var missing = Path.Combine(_workspace.Root, "does-not-exist");
+        string missing = Path.Combine(_workspace.Root, "does-not-exist");
 
-        var report = await ScanAsync(missing, _workspace.QuestionsDirectory);
+        ScanReport report = await ScanAsync(missing, _workspace.QuestionsDirectory);
 
-        var warning = Assert.Single(report.Warnings);
+        ScanWarning warning = Assert.Single(report.Warnings);
         Assert.Equal(missing, warning.DisplayPath);
         Assert.Equal(1, report.TotalQuestions);
     }

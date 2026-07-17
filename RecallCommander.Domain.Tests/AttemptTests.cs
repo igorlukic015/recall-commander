@@ -1,5 +1,5 @@
-using Xunit;
 using RecallCommander.Domain;
+using Xunit;
 
 namespace RecallCommander.Domain.Tests;
 
@@ -11,7 +11,7 @@ public sealed class AttemptTests
     [Fact]
     public void Creates_attempt_snapshot()
     {
-        var attempt = new Attempt(
+        Attempt attempt = new Attempt(
             "C# Assessment",
             CreatedAt,
             [new AttemptQuestion("What is boxing?", "Boxing wraps a value type in an object.")]);
@@ -19,7 +19,7 @@ public sealed class AttemptTests
         Assert.Equal("C# Assessment", attempt.Title);
         Assert.Equal(CreatedAt, attempt.CreatedAtUtc);
 
-        var question = Assert.Single(attempt.Questions);
+        AttemptQuestion question = Assert.Single(attempt.Questions);
         Assert.Equal("What is boxing?", question.Prompt);
         Assert.Equal("Boxing wraps a value type in an object.", question.Answer);
         Assert.True(question.IsAnswered);
@@ -51,7 +51,7 @@ public sealed class AttemptTests
     [Fact]
     public void An_empty_answer_is_valid_and_means_unanswered()
     {
-        var question = new AttemptQuestion("What is boxing?", "");
+        AttemptQuestion question = new AttemptQuestion("What is boxing?", "");
 
         Assert.Equal("", question.Answer);
         Assert.False(question.IsAnswered);
@@ -60,7 +60,7 @@ public sealed class AttemptTests
     [Fact]
     public void A_whitespace_answer_normalizes_to_unanswered()
     {
-        var question = new AttemptQuestion("What is boxing?", "   \n   ");
+        AttemptQuestion question = new AttemptQuestion("What is boxing?", "   \n   ");
 
         Assert.Equal("", question.Answer);
         Assert.False(question.IsAnswered);
@@ -75,7 +75,7 @@ public sealed class AttemptTests
     [Fact]
     public void Trims_prompt_and_answer()
     {
-        var question = new AttemptQuestion("  What is boxing?  ", "  An answer.  ");
+        AttemptQuestion question = new AttemptQuestion("  What is boxing?  ", "  An answer.  ");
 
         Assert.Equal("What is boxing?", question.Prompt);
         Assert.Equal("An answer.", question.Answer);

@@ -38,7 +38,7 @@ public static class YamlFrontmatterSerializer
 
         public void WriteYaml(IEmitter emitter, object? value, Type type, ObjectSerializer serializer)
         {
-            var formatted = value switch
+            string formatted = value switch
             {
                 DateTimeOffset timestamp => timestamp.ToString(Format, CultureInfo.InvariantCulture),
                 DateTime timestamp => timestamp.ToString(Format, CultureInfo.InvariantCulture),

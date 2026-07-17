@@ -24,9 +24,9 @@ public partial class App : Avalonia.Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             _services = BuildServices(desktop);
-            var viewModel = _services.GetRequiredService<MainWindowViewModel>();
+            MainWindowViewModel viewModel = _services.GetRequiredService<MainWindowViewModel>();
 
-            var mainWindow = new MainWindow { DataContext = viewModel };
+            MainWindow mainWindow = new MainWindow { DataContext = viewModel };
             mainWindow.Opened += (_, _) => _ = viewModel.InitializeAsync();
 
             desktop.MainWindow = mainWindow;
@@ -42,7 +42,7 @@ public partial class App : Avalonia.Application
     /// </summary>
     private static ServiceProvider BuildServices(IClassicDesktopStyleApplicationLifetime desktop)
     {
-        var services = new ServiceCollection();
+        ServiceCollection services = new ServiceCollection();
         services.AddRecallCommanderApplication();
         services.AddRecallCommanderMarkdown();
         services.AddRecallCommanderInfrastructure();

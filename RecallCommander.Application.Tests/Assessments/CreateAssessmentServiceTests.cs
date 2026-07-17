@@ -1,4 +1,3 @@
-using Xunit;
 using RecallCommander.Application.Artifacts;
 using RecallCommander.Application.Assessments;
 using RecallCommander.Application.Scanning;
@@ -6,6 +5,7 @@ using RecallCommander.Application.Tests.Fakes;
 using RecallCommander.Contracts.Artifacts;
 using RecallCommander.Contracts.Assessments;
 using RecallCommander.Domain;
+using Xunit;
 
 namespace RecallCommander.Application.Tests.Assessments;
 
@@ -59,7 +59,7 @@ public sealed class CreateAssessmentServiceTests
     {
         await AddSourceWithQuestions(3);
 
-        var result = await CreateService().CreateAsync(requestedCount: 3);
+        CreateAssessmentResult result = await CreateService().CreateAsync(requestedCount: 3);
 
         Assert.Equal(CreateAssessmentStatus.Created, result.Status);
         Assert.Equal(3, result.QuestionCount);
@@ -76,7 +76,7 @@ public sealed class CreateAssessmentServiceTests
     {
         await AddSourceWithQuestions(25);
 
-        var result = await CreateService().CreateAsync();
+        CreateAssessmentResult result = await CreateService().CreateAsync();
 
         Assert.Equal(CreateAssessmentService.DefaultQuestionCount, result.QuestionCount);
     }
@@ -86,7 +86,7 @@ public sealed class CreateAssessmentServiceTests
     {
         await AddSourceWithQuestions(2);
 
-        var result = await CreateService().CreateAsync(requestedCount: 10);
+        CreateAssessmentResult result = await CreateService().CreateAsync(requestedCount: 10);
 
         Assert.Equal(2, result.QuestionCount);
     }
@@ -97,7 +97,7 @@ public sealed class CreateAssessmentServiceTests
         await _repository.AddAsync("/notes", Now);
         _fileSystem.AddDirectory("/notes");
 
-        var result = await CreateService().CreateAsync();
+        CreateAssessmentResult result = await CreateService().CreateAsync();
 
         Assert.Equal(CreateAssessmentStatus.NoQuestionsFound, result.Status);
         Assert.Null(result.FilePath);

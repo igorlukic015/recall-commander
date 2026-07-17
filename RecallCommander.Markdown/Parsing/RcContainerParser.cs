@@ -29,13 +29,13 @@ public sealed class RcContainerParser : BlockParser
             return BlockState.None;
         }
 
-        var line = processor.Line;
+        StringSlice line = processor.Line;
         if (CountFenceChars(ref line) < FenceLength)
         {
             return BlockState.None;
         }
 
-        var name = line.ToString().Trim();
+        string name = line.ToString().Trim();
         if (!name.StartsWith("rc-", StringComparison.Ordinal))
         {
             // Not a Recall Commander block; leave the line to other parsers.
@@ -79,7 +79,7 @@ public sealed class RcContainerParser : BlockParser
 
     private static int CountFenceChars(ref StringSlice line)
     {
-        var count = 0;
+        int count = 0;
         while (line.CurrentChar == ':')
         {
             count++;

@@ -8,7 +8,7 @@ public sealed class ScanCommand(IAnsiConsole console, ScanService scanner) : Asy
 {
     public override async Task<int> ExecuteAsync(CommandContext context)
     {
-        var report = await scanner.ScanAsync();
+        ScanReport report = await scanner.ScanAsync();
 
         if (report.SourceCount == 0)
         {
@@ -19,10 +19,10 @@ public sealed class ScanCommand(IAnsiConsole console, ScanService scanner) : Asy
         console.WriteLine("Scanning...");
         console.WriteLine();
 
-        foreach (var file in report.Files.Where(file => file.Questions.Count > 0))
+        foreach (ScannedFile? file in report.Files.Where(file => file.Questions.Count > 0))
         {
             console.MarkupLineInterpolated($"[bold]{file.DisplayPath}[/]");
-            var count = file.Questions.Count;
+            int count = file.Questions.Count;
             console.WriteLine($"  Found {count} {(count == 1 ? "question" : "questions")}");
             console.WriteLine();
         }
@@ -32,7 +32,7 @@ public sealed class ScanCommand(IAnsiConsole console, ScanService scanner) : Asy
             console.MarkupLine("[yellow]Warnings:[/]");
             console.WriteLine();
 
-            foreach (var warning in report.Warnings)
+            foreach (ScanWarning warning in report.Warnings)
             {
                 console.MarkupLineInterpolated($"[yellow]{warning.Location}[/]");
                 console.WriteLine(warning.Message);

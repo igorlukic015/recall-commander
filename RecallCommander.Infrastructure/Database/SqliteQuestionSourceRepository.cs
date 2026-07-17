@@ -1,5 +1,6 @@
 using System.Globalization;
 using Dapper;
+using Microsoft.Data.Sqlite;
 using RecallCommander.Contracts.Sources;
 using RecallCommander.Domain;
 
@@ -13,9 +14,9 @@ public sealed class SqliteQuestionSourceRepository(ISqliteConnectionFactory conn
         DateTimeOffset registeredAtUtc,
         CancellationToken cancellationToken = default)
     {
-        await using var connection = connectionFactory.CreateOpenConnection();
+        await using SqliteConnection connection = connectionFactory.CreateOpenConnection();
 
-        var id = await connection.ExecuteScalarAsync<long>(new CommandDefinition(
+        long id = await connection.ExecuteScalarAsync<long>(new CommandDefinition(
             """
             INSERT INTO question_sources (directory_path, registered_at_utc)
             VALUES (@DirectoryPath, @RegisteredAtUtc);
@@ -29,9 +30,9 @@ public sealed class SqliteQuestionSourceRepository(ISqliteConnectionFactory conn
 
     public async Task<IReadOnlyList<QuestionSource>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        await using var connection = connectionFactory.CreateOpenConnection();
+        await using SqliteConnection connection = connectionFactory.CreateOpenConnection();
 
-        var rows = await connection.QueryAsync<QuestionSourceRow>(new CommandDefinition(
+        IEnumerable<QuestionSourceRow> rows = await connection.QueryAsync<QuestionSourceRow>(new CommandDefinition(
             """
             SELECT id                AS Id,
                    directory_path    AS DirectoryPath,
@@ -46,7 +47,7 @@ public sealed class SqliteQuestionSourceRepository(ISqliteConnectionFactory conn
 
     public async Task<bool> ExistsAsync(string directoryPath, CancellationToken cancellationToken = default)
     {
-        await using var connection = connectionFactory.CreateOpenConnection();
+        await using SqliteConnection connection = connectionFactory.CreateOpenConnection();
 
         return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
             "SELECT EXISTS (SELECT 1 FROM question_sources WHERE directory_path = @DirectoryPath)",

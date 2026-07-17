@@ -12,7 +12,7 @@ public sealed class InMemoryQuestionSourceRepository : IQuestionSourceRepository
         DateTimeOffset registeredAtUtc,
         CancellationToken cancellationToken = default)
     {
-        var source = new QuestionSource(_sources.Count + 1, directoryPath, registeredAtUtc);
+        QuestionSource source = new QuestionSource(_sources.Count + 1, directoryPath, registeredAtUtc);
         _sources.Add(source);
         return Task.FromResult(source);
     }

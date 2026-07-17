@@ -1,8 +1,8 @@
-using Xunit;
 using RecallCommander.Application.Attempts;
 using RecallCommander.Infrastructure.FileSystem;
 using RecallCommander.IntegrationTests.Support;
 using RecallCommander.Markdown.Parsing;
+using Xunit;
 
 namespace RecallCommander.IntegrationTests.Integration;
 
@@ -22,7 +22,7 @@ public sealed class AttemptParsingTests : IDisposable
     [Fact]
     public void Parses_a_completed_attempt_file_and_preserves_question_order()
     {
-        var path = _workspace.WriteFile(
+        string path = _workspace.WriteFile(
             AttemptsDirectory,
             "assessment-2026-07-17-001.attempt.md",
             """
@@ -70,7 +70,7 @@ public sealed class AttemptParsingTests : IDisposable
             ### Answer
             """);
 
-        var result = _service.Validate(path);
+        ValidateAttemptResult result = _service.Validate(path);
 
         Assert.Equal(ValidateAttemptStatus.Valid, result.Status);
         Assert.Equal("Assessment 2026-07-17", result.Attempt!.Title);
@@ -88,7 +88,7 @@ public sealed class AttemptParsingTests : IDisposable
     [Fact]
     public void Recovers_after_a_malformed_section_and_reports_every_problem()
     {
-        var path = _workspace.WriteFile(
+        string path = _workspace.WriteFile(
             AttemptsDirectory,
             "broken.attempt.md",
             """
@@ -121,7 +121,7 @@ public sealed class AttemptParsingTests : IDisposable
             A perfectly fine answer.
             """);
 
-        var result = _service.Validate(path);
+        ValidateAttemptResult result = _service.Validate(path);
 
         // Question 1 is missing its Answer heading (line 7) and question 2
         // has no prompt (line 13); question 3 parsed cleanly after both.
@@ -136,7 +136,7 @@ public sealed class AttemptParsingTests : IDisposable
     [Fact]
     public void The_result_locates_problems_by_file_and_line()
     {
-        var path = _workspace.WriteFile(
+        string path = _workspace.WriteFile(
             AttemptsDirectory,
             "unanswered.attempt.md",
             """
@@ -151,7 +151,7 @@ public sealed class AttemptParsingTests : IDisposable
             First prompt?
             """);
 
-        var result = _service.Validate(path);
+        ValidateAttemptResult result = _service.Validate(path);
 
         Assert.Equal(ValidateAttemptStatus.Invalid, result.Status);
         Assert.Equal(path, result.FilePath);
@@ -161,7 +161,7 @@ public sealed class AttemptParsingTests : IDisposable
     [Fact]
     public void Reports_a_missing_file_without_touching_the_parser()
     {
-        var result = _service.Validate(Path.Combine(AttemptsDirectory, "nope.md"));
+        ValidateAttemptResult result = _service.Validate(Path.Combine(AttemptsDirectory, "nope.md"));
 
         Assert.Equal(ValidateAttemptStatus.FileNotFound, result.Status);
     }

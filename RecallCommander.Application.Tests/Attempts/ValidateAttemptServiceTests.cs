@@ -1,9 +1,9 @@
-using Xunit;
 using RecallCommander.Application.Attempts;
 using RecallCommander.Application.Tests.Fakes;
 using RecallCommander.Contracts.Attempts;
 using RecallCommander.Contracts.Parsing;
 using RecallCommander.Domain;
+using Xunit;
 
 namespace RecallCommander.Application.Tests.Attempts;
 
@@ -17,10 +17,10 @@ public sealed class ValidateAttemptServiceTests
     [Fact]
     public void Reports_a_missing_file()
     {
-        var parser = new FakeAttemptParser(new AttemptParseResult(SampleAttempt(), []));
-        var service = new ValidateAttemptService(new FakeFileSystem(), parser);
+        FakeAttemptParser parser = new FakeAttemptParser(new AttemptParseResult(SampleAttempt(), []));
+        ValidateAttemptService service = new ValidateAttemptService(new FakeFileSystem(), parser);
 
-        var result = service.Validate("attempts/missing.md");
+        ValidateAttemptResult result = service.Validate("attempts/missing.md");
 
         Assert.Equal(ValidateAttemptStatus.FileNotFound, result.Status);
         Assert.Equal("attempts/missing.md", result.FilePath);
@@ -30,12 +30,12 @@ public sealed class ValidateAttemptServiceTests
     [Fact]
     public void Parses_the_file_content_and_returns_the_attempt()
     {
-        var attempt = SampleAttempt();
-        var parser = new FakeAttemptParser(new AttemptParseResult(attempt, []));
-        var fileSystem = new FakeFileSystem().AddFile("attempts/done.md", "the document");
-        var service = new ValidateAttemptService(fileSystem, parser);
+        Attempt attempt = SampleAttempt();
+        FakeAttemptParser parser = new FakeAttemptParser(new AttemptParseResult(attempt, []));
+        FakeFileSystem fileSystem = new FakeFileSystem().AddFile("attempts/done.md", "the document");
+        ValidateAttemptService service = new ValidateAttemptService(fileSystem, parser);
 
-        var result = service.Validate("attempts/done.md");
+        ValidateAttemptResult result = service.Validate("attempts/done.md");
 
         Assert.Equal(ValidateAttemptStatus.Valid, result.Status);
         Assert.Same(attempt, result.Attempt);
@@ -46,16 +46,16 @@ public sealed class ValidateAttemptServiceTests
     [Fact]
     public void Passes_parser_diagnostics_through_when_the_document_is_invalid()
     {
-        var diagnostics = new[]
+        ParseDiagnostic[] diagnostics = new[]
         {
             new ParseDiagnostic(7, "Missing '### Answer' heading."),
             new ParseDiagnostic(13, "Question has no prompt text."),
         };
-        var parser = new FakeAttemptParser(new AttemptParseResult(Attempt: null, diagnostics));
-        var fileSystem = new FakeFileSystem().AddFile("attempts/broken.md", "the document");
-        var service = new ValidateAttemptService(fileSystem, parser);
+        FakeAttemptParser parser = new FakeAttemptParser(new AttemptParseResult(Attempt: null, diagnostics));
+        FakeFileSystem fileSystem = new FakeFileSystem().AddFile("attempts/broken.md", "the document");
+        ValidateAttemptService service = new ValidateAttemptService(fileSystem, parser);
 
-        var result = service.Validate("attempts/broken.md");
+        ValidateAttemptResult result = service.Validate("attempts/broken.md");
 
         Assert.Equal(ValidateAttemptStatus.Invalid, result.Status);
         Assert.Null(result.Attempt);

@@ -1,8 +1,8 @@
-using Xunit;
 using RecallCommander.Application.Artifacts;
 using RecallCommander.Infrastructure.Artifacts;
 using RecallCommander.IntegrationTests.Support;
 using RecallCommander.Markdown.Writing;
+using Xunit;
 
 namespace RecallCommander.IntegrationTests.Integration;
 
@@ -20,13 +20,13 @@ public sealed class ArtifactStoreTests : IDisposable
     [Fact]
     public async Task Creates_the_output_directory_and_writes_the_document()
     {
-        var directory = Path.Combine(_workspace.Root, "Assessments");
-        var document = new MarkdownArtifactBuilder()
+        string directory = Path.Combine(_workspace.Root, "Assessments");
+        string document = new MarkdownArtifactBuilder()
             .WithFrontmatter(new { Type = "assessment", Title = "Test" })
             .AppendHeading(1, "Test")
             .Build();
 
-        var path = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => document);
+        string path = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => document);
 
         Assert.True(Directory.Exists(directory));
         Assert.Equal(document, await File.ReadAllTextAsync(path));
@@ -35,11 +35,11 @@ public sealed class ArtifactStoreTests : IDisposable
     [Fact]
     public async Task Assigns_deterministic_sequence_numbers()
     {
-        var directory = Path.Combine(_workspace.Root, "Assessments");
+        string directory = Path.Combine(_workspace.Root, "Assessments");
 
-        var first = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => "one");
-        var second = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => "two");
-        var third = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => "three");
+        string first = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => "one");
+        string second = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => "two");
+        string third = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => "three");
 
         Assert.Equal("assessment-2026-07-16-001.md", Path.GetFileName(first));
         Assert.Equal("assessment-2026-07-16-002.md", Path.GetFileName(second));
@@ -51,10 +51,10 @@ public sealed class ArtifactStoreTests : IDisposable
     [Fact]
     public async Task Different_stems_get_independent_sequences()
     {
-        var directory = Path.Combine(_workspace.Root, "Assessments");
+        string directory = Path.Combine(_workspace.Root, "Assessments");
 
         await _store.SaveAsync(directory, "assessment-2026-07-16", _ => "a");
-        var otherDay = await _store.SaveAsync(directory, "assessment-2026-07-17", _ => "b");
+        string otherDay = await _store.SaveAsync(directory, "assessment-2026-07-17", _ => "b");
 
         Assert.Equal("assessment-2026-07-17-001.md", Path.GetFileName(otherDay));
     }
@@ -62,10 +62,10 @@ public sealed class ArtifactStoreTests : IDisposable
     [Fact]
     public async Task Rendering_receives_the_artifact_id_matching_the_file_name()
     {
-        var directory = Path.Combine(_workspace.Root, "Assessments");
+        string directory = Path.Combine(_workspace.Root, "Assessments");
 
-        var first = await _store.SaveAsync(directory, "assessment-2026-07-16", id => $"id: {id}");
-        var second = await _store.SaveAsync(directory, "assessment-2026-07-16", id => $"id: {id}");
+        string first = await _store.SaveAsync(directory, "assessment-2026-07-16", id => $"id: {id}");
+        string second = await _store.SaveAsync(directory, "assessment-2026-07-16", id => $"id: {id}");
 
         Assert.Equal("id: assessment-2026-07-16-001", await File.ReadAllTextAsync(first));
         Assert.Equal("id: assessment-2026-07-16-002", await File.ReadAllTextAsync(second));

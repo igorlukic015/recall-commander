@@ -18,8 +18,8 @@ public sealed class ArtifactFileStore(ArtifactFileNameGenerator fileNames) : IAr
     {
         Directory.CreateDirectory(directoryPath);
 
-        var filePath = NextAvailablePath(directoryPath, fileNameStem);
-        var artifactId = Path.GetFileNameWithoutExtension(filePath);
+        string filePath = NextAvailablePath(directoryPath, fileNameStem);
+        string artifactId = Path.GetFileNameWithoutExtension(filePath);
 
         await File.WriteAllTextAsync(filePath, renderMarkdown(artifactId), cancellationToken);
         return filePath;
@@ -27,9 +27,9 @@ public sealed class ArtifactFileStore(ArtifactFileNameGenerator fileNames) : IAr
 
     private string NextAvailablePath(string directoryPath, string fileNameStem)
     {
-        for (var sequence = 1; ; sequence++)
+        for (int sequence = 1; ; sequence++)
         {
-            var candidate = Path.Combine(directoryPath, fileNames.CreateNumberedFileName(fileNameStem, sequence));
+            string candidate = Path.Combine(directoryPath, fileNames.CreateNumberedFileName(fileNameStem, sequence));
             if (!File.Exists(candidate))
             {
                 return candidate;

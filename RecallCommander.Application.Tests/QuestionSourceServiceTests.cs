@@ -1,6 +1,7 @@
-using Xunit;
 using RecallCommander.Application.Sources;
 using RecallCommander.Application.Tests.Fakes;
+using RecallCommander.Domain;
+using Xunit;
 
 namespace RecallCommander.Application.Tests;
 
@@ -17,7 +18,7 @@ public sealed class QuestionSourceServiceTests
     {
         _fileSystem.AddDirectory("/notes");
 
-        var result = await CreateService().AddAsync("/notes");
+        AddSourceResult result = await CreateService().AddAsync("/notes");
 
         Assert.Equal(AddSourceStatus.Added, result.Status);
         Assert.NotNull(result.Source);
@@ -28,7 +29,7 @@ public sealed class QuestionSourceServiceTests
     [Fact]
     public async Task Rejects_missing_directory()
     {
-        var result = await CreateService().AddAsync("/does-not-exist");
+        AddSourceResult result = await CreateService().AddAsync("/does-not-exist");
 
         Assert.Equal(AddSourceStatus.DirectoryNotFound, result.Status);
         Assert.Empty(await _repository.GetAllAsync());
@@ -38,10 +39,10 @@ public sealed class QuestionSourceServiceTests
     public async Task Reports_already_registered_directory()
     {
         _fileSystem.AddDirectory("/notes");
-        var service = CreateService();
+        QuestionSourceService service = CreateService();
         await service.AddAsync("/notes");
 
-        var result = await service.AddAsync("/notes");
+        AddSourceResult result = await service.AddAsync("/notes");
 
         Assert.Equal(AddSourceStatus.AlreadyRegistered, result.Status);
         Assert.Single(await _repository.GetAllAsync());
@@ -51,11 +52,11 @@ public sealed class QuestionSourceServiceTests
     public async Task Lists_sources_in_registration_order()
     {
         _fileSystem.AddDirectory("/a").AddDirectory("/b");
-        var service = CreateService();
+        QuestionSourceService service = CreateService();
         await service.AddAsync("/a");
         await service.AddAsync("/b");
 
-        var sources = await service.ListAsync();
+        IReadOnlyList<QuestionSource> sources = await service.ListAsync();
 
         Assert.Equal(["/a", "/b"], sources.Select(source => source.DirectoryPath));
     }

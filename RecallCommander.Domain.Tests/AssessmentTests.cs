@@ -1,5 +1,5 @@
-using Xunit;
 using RecallCommander.Domain;
+using Xunit;
 
 namespace RecallCommander.Domain.Tests;
 
@@ -11,7 +11,7 @@ public sealed class AssessmentTests
     [Fact]
     public void Creates_assessment_snapshot()
     {
-        var assessment = new Assessment(
+        Assessment assessment = new Assessment(
             "C# Assessment",
             CreatedAt,
             [new AssessmentQuestion("What is boxing?")]);
@@ -47,13 +47,13 @@ public sealed class AssessmentTests
     [Fact]
     public void Copies_only_the_prompt_from_a_discovered_question()
     {
-        var question = new Question(
+        Question question = new Question(
             QuestionType.Recall,
             "What is boxing?",
             "Boxing converts a value type into an object.",
             ["Boxing", "Value Types"]);
 
-        var snapshot = AssessmentQuestion.FromQuestion(question);
+        AssessmentQuestion snapshot = AssessmentQuestion.FromQuestion(question);
 
         Assert.Equal("What is boxing?", snapshot.Prompt);
     }

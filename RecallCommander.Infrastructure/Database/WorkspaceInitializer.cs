@@ -31,9 +31,9 @@ public sealed class WorkspaceInitializer(IDataPaths dataPaths) : IWorkspaceIniti
     public async Task<InitializationResult> InitializeAsync(CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(dataPaths.DataDirectory);
-        var existed = File.Exists(dataPaths.DatabasePath);
+        bool existed = File.Exists(dataPaths.DatabasePath);
 
-        await using var connection = new SqliteConnection($"Data Source={dataPaths.DatabasePath}");
+        await using SqliteConnection connection = new SqliteConnection($"Data Source={dataPaths.DatabasePath}");
         await connection.OpenAsync(cancellationToken);
         await connection.ExecuteAsync(new CommandDefinition(Schema, cancellationToken: cancellationToken));
 

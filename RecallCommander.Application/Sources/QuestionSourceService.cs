@@ -14,7 +14,7 @@ public sealed class QuestionSourceService(
 {
     public async Task<AddSourceResult> AddAsync(string path, CancellationToken cancellationToken = default)
     {
-        var directoryPath = fileSystem.NormalizePath(path);
+        string directoryPath = fileSystem.NormalizePath(path);
 
         if (!fileSystem.DirectoryExists(directoryPath))
         {
@@ -26,7 +26,7 @@ public sealed class QuestionSourceService(
             return new AddSourceResult(AddSourceStatus.AlreadyRegistered, directoryPath, Source: null);
         }
 
-        var source = await repository.AddAsync(directoryPath, timeProvider.GetUtcNow(), cancellationToken);
+        QuestionSource source = await repository.AddAsync(directoryPath, timeProvider.GetUtcNow(), cancellationToken);
         return new AddSourceResult(AddSourceStatus.Added, directoryPath, source);
     }
 

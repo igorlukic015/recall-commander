@@ -3,6 +3,7 @@ using RecallCommander.Cli;
 using RecallCommander.Contracts.Artifacts;
 using RecallCommander.Infrastructure.Database;
 using Spectre.Console;
+using Spectre.Console.Cli;
 using Spectre.Console.Testing;
 
 namespace RecallCommander.IntegrationTests.Support;
@@ -17,10 +18,10 @@ public sealed class CliRunner(TestWorkspace workspace)
 {
     public async Task<CliResult> RunAsync(params string[] args)
     {
-        var console = new TestConsole();
+        TestConsole console = new TestConsole();
         console.Profile.Width = 300;
 
-        var app = CommandAppFactory.Create(
+        CommandApp app = CommandAppFactory.Create(
             services =>
             {
                 services.AddSingleton<IDataPaths>(new TestDataPaths(workspace.DataDirectory));
@@ -29,7 +30,7 @@ public sealed class CliRunner(TestWorkspace workspace)
             },
             console);
 
-        var exitCode = await app.RunAsync(args);
+        int exitCode = await app.RunAsync(args);
         return new CliResult(exitCode, console.Output);
     }
 }
