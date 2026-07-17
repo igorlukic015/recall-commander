@@ -4,6 +4,7 @@
   <Project Path="RecallCommander.Domain/RecallCommander.Domain.csproj" />
   <Project Path="RecallCommander.Infrastructure/RecallCommander.Infrastructure.csproj" />
   <Project Path="RecallCommander.Markdown/RecallCommander.Markdown.csproj" />
+  <Project Path="RecallCommander.Workbench/RecallCommander.Workbench.csproj" />
   <Project Path="RecallCommander.Domain.Tests/RecallCommander.Domain.Tests.csproj" />
   <Project Path="RecallCommander.Application.Tests/RecallCommander.Application.Tests.csproj" />
   <Project Path="RecallCommander.Markdown.Tests/RecallCommander.Markdown.Tests.csproj" />

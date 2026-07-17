@@ -1,0 +1,107 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RecallCommander.Workbench.ViewModels"
+        xmlns:domain="using:RecallCommander.Domain"
+        x:Class="RecallCommander.Workbench.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="Recall Commander"
+        Width="760" Height="860"
+        MinWidth="560" MinHeight="640">
+
+    <Window.Styles>
+        <Style Selector="TextBlock.sectionHeader">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style Selector="Separator">
+            <Setter Property="Margin" Value="0,16" />
+        </Style>
+    </Window.Styles>
+
+    <Grid Margin="16" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,*">
+
+        <TextBlock Grid.Row="0"
+                   Text="Recall Commander"
+                   FontSize="22"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,16" />
+
+        <!-- Question Sources -->
+        <StackPanel Grid.Row="1">
+            <TextBlock Classes="sectionHeader" Text="Question Sources" />
+
+            <ListBox ItemsSource="{Binding Sources}"
+                     SelectedItem="{Binding SelectedSource}"
+                     Height="140">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="domain:QuestionSource">
+                        <TextBlock Text="{Binding DirectoryPath}" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                <Button Content="Add Source" Command="{Binding AddSourceCommand}" />
+
+                <!-- The border carries the tooltip: disabled controls do not
+                     always trigger tooltips themselves. -->
+                <Border Background="Transparent" ToolTip.Tip="Not implemented yet.">
+                    <Button Content="Remove Source" IsEnabled="False" />
+                </Border>
+
+                <Button Content="Scan Sources" Command="{Binding ScanSourcesCommand}" />
+            </StackPanel>
+        </StackPanel>
+
+        <Separator Grid.Row="2" />
+
+        <!-- Questions -->
+        <StackPanel Grid.Row="3" Spacing="4">
+            <TextBlock Classes="sectionHeader" Text="Questions" />
+            <TextBlock Text="{Binding Sources.Count, StringFormat='Registered sources: {0}'}" />
+            <TextBlock Text="{Binding DiscoveredQuestionsText}" />
+        </StackPanel>
+
+        <Separator Grid.Row="4" />
+
+        <!-- Assessment -->
+        <StackPanel Grid.Row="5">
+            <TextBlock Classes="sectionHeader" Text="Assessment" />
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Question Count" VerticalAlignment="Center" />
+                <NumericUpDown Value="{Binding QuestionCount}"
+                               Minimum="1"
+                               Increment="1"
+                               FormatString="0"
+                               Width="130" />
+                <Button Content="Create Assessment" Command="{Binding CreateAssessmentCommand}" />
+            </StackPanel>
+        </StackPanel>
+
+        <Separator Grid.Row="6" />
+
+        <!-- Attempt -->
+        <StackPanel Grid.Row="7">
+            <TextBlock Classes="sectionHeader" Text="Attempt" />
+            <Button Content="Validate Attempt"
+                    Command="{Binding ValidateAttemptCommand}"
+                    HorizontalAlignment="Left" />
+        </StackPanel>
+
+        <Separator Grid.Row="8" />
+
+        <!-- Output -->
+        <Grid Grid.Row="9" RowDefinitions="Auto,*">
+            <TextBlock Grid.Row="0" Classes="sectionHeader" Text="Output" />
+            <TextBox Grid.Row="1"
+                     Text="{Binding OutputText, Mode=OneWay}"
+                     IsReadOnly="True"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto" />
+        </Grid>
+
+    </Grid>
+
+</Window>
