@@ -30,16 +30,16 @@ public partial class MainWindowViewModel(
     public ObservableCollection<QuestionSource> Sources { get; } = [];
 
     [ObservableProperty]
-    private QuestionSource? _selectedSource;
+    public partial QuestionSource? SelectedSource { get; set; }
 
     [ObservableProperty]
-    private string _discoveredQuestionsText = "Discovered questions: not scanned yet";
+    public partial string DiscoveredQuestionsText { get; private set; } = "Discovered questions: not scanned yet";
 
     [ObservableProperty]
-    private decimal? _questionCount = CreateAssessmentService.DefaultQuestionCount;
+    public partial decimal? QuestionCount { get; set; } = CreateAssessmentService.DefaultQuestionCount;
 
     [ObservableProperty]
-    private string _outputText = string.Empty;
+    public partial string OutputText { get; private set; } = string.Empty;
 
     /// <summary>
     /// Prepares the workspace (same as "rc init"; idempotent) and loads the

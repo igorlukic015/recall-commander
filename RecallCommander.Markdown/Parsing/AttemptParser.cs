@@ -273,8 +273,19 @@ public sealed class AttemptParser : IAttemptParser
 
     private static int LineOf(Block block) => block.Line + 1;
 
-    private static string? FirstNonEmpty(params string?[] values) =>
-        values.Select(value => value?.Trim()).FirstOrDefault(value => !string.IsNullOrEmpty(value));
+    private static string? FirstNonEmpty(params ReadOnlySpan<string?> values)
+    {
+        foreach (var value in values)
+        {
+            var trimmed = value?.Trim();
+            if (!string.IsNullOrEmpty(trimmed))
+            {
+                return trimmed;
+            }
+        }
+
+        return null;
+    }
 
     /// <summary>Extracts the raw source text spanned by a list of blocks.</summary>
     private static string RawText(List<Block> blocks, string markdown) =>
