@@ -41,7 +41,7 @@ public sealed class AttemptParser : IAttemptParser
         var document = Markdig.Markdown.Parse(markdown, Pipeline);
         var diagnostics = new List<ParseDiagnostic>();
 
-        var createdAt = ParseFrontmatter(document, out var frontmatterTitle, diagnostics);
+        var createdAt = ParseFrontmatter(document, out var frontmatterTitle, out var assessmentId, diagnostics);
         var questions = ParseQuestionSections(document, markdown, diagnostics, out var sectionCount);
 
         var title = frontmatterTitle ?? FirstTitleHeading(document);
@@ -60,15 +60,17 @@ public sealed class AttemptParser : IAttemptParser
             return new AttemptParseResult(Attempt: null, diagnostics);
         }
 
-        return new AttemptParseResult(new Attempt(title!, createdAt!.Value, questions), diagnostics);
+        return new AttemptParseResult(new Attempt(title!, createdAt!.Value, questions, assessmentId), diagnostics);
     }
 
     private static DateTimeOffset? ParseFrontmatter(
         MarkdownDocument document,
         out string? title,
+        out string? assessmentId,
         List<ParseDiagnostic> diagnostics)
     {
         title = null;
+        assessmentId = null;
 
         if (document.FirstOrDefault() is not YamlFrontMatterBlock yaml)
         {
@@ -110,6 +112,12 @@ public sealed class AttemptParser : IAttemptParser
         }
 
         title = string.IsNullOrWhiteSpace(frontmatter.Title) ? null : frontmatter.Title.Trim();
+
+        // The assessment identity, preserved through Save As: either an
+        // explicit 'assessment' reference or the 'id' the generated
+        // assessment carried. Both are optional — older documents have
+        // neither.
+        assessmentId = FirstNonEmpty(frontmatter.Assessment, frontmatter.Id);
 
         if (string.IsNullOrWhiteSpace(frontmatter.Created))
         {
@@ -265,6 +273,9 @@ public sealed class AttemptParser : IAttemptParser
 
     private static int LineOf(Block block) => block.Line + 1;
 
+    private static string? FirstNonEmpty(params string?[] values) =>
+        values.Select(value => value?.Trim()).FirstOrDefault(value => !string.IsNullOrEmpty(value));
+
     /// <summary>Extracts the raw source text spanned by a list of blocks.</summary>
     private static string RawText(List<Block> blocks, string markdown) =>
         blocks.Count == 0 ? string.Empty : RawText(blocks[0], blocks[^1], markdown);
@@ -297,6 +308,10 @@ public sealed class AttemptParser : IAttemptParser
     private sealed class AttemptFrontmatter
     {
         public string? Type { get; set; }
+
+        public string? Id { get; set; }
+
+        public string? Assessment { get; set; }
 
         public string? Title { get; set; }
 

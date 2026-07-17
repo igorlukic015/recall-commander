@@ -7,31 +7,18 @@ namespace RecallCommander.Application.Artifacts;
 /// </summary>
 public interface IArtifactRenderer<in T>
 {
-    ArtifactContent Render(T artifact);
-}
-
-/// <summary>
-/// The rendered form of an artifact: its complete Markdown document, a slug
-/// used to derive the file name, and the directory this artifact type lives in.
-/// </summary>
-public sealed record ArtifactContent
-{
-    public ArtifactContent(string slug, string directoryName, string markdown)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(slug);
-        ArgumentException.ThrowIfNullOrWhiteSpace(directoryName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(markdown);
-        Slug = slug;
-        DirectoryName = directoryName;
-        Markdown = markdown;
-    }
-
-    /// <summary>File name stem, e.g. "assessment".</summary>
-    public string Slug { get; }
+    /// <summary>File name stem for this artifact type, e.g. "assessment".</summary>
+    string Slug { get; }
 
     /// <summary>Subdirectory of the artifact output root, e.g. "Assessments".</summary>
-    public string DirectoryName { get; }
+    string DirectoryName { get; }
 
-    /// <summary>The full document: YAML frontmatter followed by the Markdown body.</summary>
-    public string Markdown { get; }
+    /// <summary>
+    /// Renders the complete document: YAML frontmatter followed by the
+    /// Markdown body. The artifact id is the file name the store assigned
+    /// (without extension, e.g. "assessment-2026-07-17-001") so generated
+    /// artifacts carry their identity in frontmatter and can reference each
+    /// other without depending on filenames or database records.
+    /// </summary>
+    string Render(T artifact, string artifactId);
 }

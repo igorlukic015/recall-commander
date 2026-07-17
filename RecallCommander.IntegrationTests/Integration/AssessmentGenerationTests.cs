@@ -76,6 +76,7 @@ public sealed class AssessmentGenerationTests : IDisposable
 
         Assert.StartsWith("---\n", document);
         Assert.Contains("type: assessment", document);
+        Assert.Contains("id: assessment-2026-07-16-001", document);
         Assert.Contains("title: Assessment 2026-07-16", document);
         Assert.Contains("created: 2026-07-16T18:00:00", document);
         Assert.Contains("question_count: 3", document);
@@ -132,6 +133,23 @@ public sealed class AssessmentGenerationTests : IDisposable
 
         Assert.EndsWith("assessment-2026-07-16-001.md", first.FilePath);
         Assert.EndsWith("assessment-2026-07-16-002.md", second.FilePath);
+    }
+
+    [Fact]
+    public async Task Frontmatter_id_matches_the_generated_file_name()
+    {
+        AddSampleQuestions();
+        var service = CreateService();
+
+        var first = await service.CreateAsync(requestedCount: 2);
+        var second = await service.CreateAsync(requestedCount: 2);
+
+        foreach (var result in new[] { first, second })
+        {
+            var expectedId = Path.GetFileNameWithoutExtension(result.FilePath!);
+            var document = await File.ReadAllTextAsync(result.FilePath!);
+            Assert.Contains($"\nid: {expectedId}\n", document);
+        }
     }
 
     [Fact]

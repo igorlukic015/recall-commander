@@ -6,6 +6,8 @@ namespace RecallCommander.Markdown.Tests;
 
 public sealed class AssessmentRendererTests
 {
+    private const string ArtifactId = "assessment-2026-07-16-001";
+
     private static readonly DateTimeOffset CreatedAt =
         new(2026, 7, 16, 18, 0, 0, TimeSpan.Zero);
 
@@ -21,12 +23,13 @@ public sealed class AssessmentRendererTests
             new AssessmentQuestion("Why can boxing negatively affect performance?"),
         ]);
 
-        var content = _renderer.Render(assessment);
+        var markdown = _renderer.Render(assessment, ArtifactId);
 
         const string expected =
             """
             ---
             type: assessment
+            id: assessment-2026-07-16-001
             title: C# Assessment
             created: 2026-07-16T18:00:00
             question_count: 3
@@ -62,18 +65,24 @@ public sealed class AssessmentRendererTests
 
             """;
 
-        Assert.Equal(expected.ReplaceLineEndings("\n"), content.Markdown);
+        Assert.Equal(expected.ReplaceLineEndings("\n"), markdown);
+    }
+
+    [Fact]
+    public void Frontmatter_id_is_the_artifact_id_it_was_rendered_with()
+    {
+        var assessment = new Assessment("Title", CreatedAt, [new AssessmentQuestion("Prompt?")]);
+
+        var markdown = _renderer.Render(assessment, "assessment-2026-07-16-042");
+
+        Assert.Contains("\nid: assessment-2026-07-16-042\n", markdown);
     }
 
     [Fact]
     public void Uses_the_assessment_slug_and_directory()
     {
-        var assessment = new Assessment("Title", CreatedAt, [new AssessmentQuestion("Prompt?")]);
-
-        var content = _renderer.Render(assessment);
-
-        Assert.Equal("assessment", content.Slug);
-        Assert.Equal("Assessments", content.DirectoryName);
+        Assert.Equal("assessment", _renderer.Slug);
+        Assert.Equal("Assessments", _renderer.DirectoryName);
     }
 
     [Fact]
@@ -82,8 +91,8 @@ public sealed class AssessmentRendererTests
         var prompt = "Explain garbage collection.\n\nYour answer should include:\n\n- generations\n- the large object heap";
         var assessment = new Assessment("Title", CreatedAt, [new AssessmentQuestion(prompt)]);
 
-        var content = _renderer.Render(assessment);
+        var markdown = _renderer.Render(assessment, ArtifactId);
 
-        Assert.Contains(prompt, content.Markdown);
+        Assert.Contains(prompt, markdown);
     }
 }

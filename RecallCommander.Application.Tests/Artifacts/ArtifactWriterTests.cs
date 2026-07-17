@@ -9,8 +9,12 @@ public sealed class ArtifactWriterTests
 
     private sealed class TestRenderer : IArtifactRenderer<TestArtifact>
     {
-        public ArtifactContent Render(TestArtifact artifact) =>
-            new(artifact.Title, "TestArtifacts", $"# {artifact.Title}\n");
+        public string Slug => "my-assessment";
+
+        public string DirectoryName => "TestArtifacts";
+
+        public string Render(TestArtifact artifact, string artifactId) =>
+            $"id: {artifactId}\n# {artifact.Title}\n";
     }
 
     private sealed class RecordingStore : IArtifactStore
@@ -24,12 +28,12 @@ public sealed class ArtifactWriterTests
         public Task<string> SaveAsync(
             string directoryPath,
             string fileNameStem,
-            string markdown,
+            Func<string, string> renderMarkdown,
             CancellationToken cancellationToken = default)
         {
             DirectoryPath = directoryPath;
             FileNameStem = fileNameStem;
-            Markdown = markdown;
+            Markdown = renderMarkdown($"{fileNameStem}-001");
             return Task.FromResult(Path.Combine(directoryPath, $"{fileNameStem}-001.md"));
         }
     }
@@ -45,7 +49,7 @@ public sealed class ArtifactWriterTests
     }
 
     [Fact]
-    public async Task Renders_names_and_persists_the_artifact()
+    public async Task Names_renders_with_the_assigned_id_and_persists_the_artifact()
     {
         var store = new RecordingStore();
         var writer = new ArtifactWriter<TestArtifact>(
@@ -59,7 +63,7 @@ public sealed class ArtifactWriterTests
 
         Assert.Equal(Path.Combine("/output", "TestArtifacts"), store.DirectoryPath);
         Assert.Equal("my-assessment-2026-07-16", store.FileNameStem);
-        Assert.Equal("# My Assessment\n", store.Markdown);
+        Assert.Equal("id: my-assessment-2026-07-16-001\n# My Assessment\n", store.Markdown);
         Assert.Equal(
             Path.Combine("/output", "TestArtifacts", "my-assessment-2026-07-16-001.md"),
             saved.FilePath);

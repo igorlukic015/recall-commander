@@ -1,9 +1,11 @@
 namespace RecallCommander.Application.Artifacts;
 
 /// <summary>
-/// Default artifact writing pipeline: render → name → persist.
+/// Default artifact writing pipeline: name → render → persist.
 /// Generic over the artifact type so every artifact shares the same file
-/// naming, output directory handling and persistence behavior.
+/// naming, output directory handling and persistence behavior. The store
+/// assigns the artifact id (the sequenced file name) and rendering receives
+/// it, so the id embedded in the document always matches the file name.
 /// </summary>
 public sealed class ArtifactWriter<T>(
     IArtifactRenderer<T> renderer,
@@ -14,11 +16,15 @@ public sealed class ArtifactWriter<T>(
 {
     public async Task<SavedArtifact> WriteAsync(T artifact, CancellationToken cancellationToken = default)
     {
-        var content = renderer.Render(artifact);
-        var stem = fileNames.CreateStem(content.Slug, timeProvider.GetUtcNow());
-        var directory = Path.Combine(outputPath.GetOutputDirectory(), content.DirectoryName);
+        var stem = fileNames.CreateStem(renderer.Slug, timeProvider.GetUtcNow());
+        var directory = Path.Combine(outputPath.GetOutputDirectory(), renderer.DirectoryName);
 
-        var filePath = await store.SaveAsync(directory, stem, content.Markdown, cancellationToken);
+        var filePath = await store.SaveAsync(
+            directory,
+            stem,
+            artifactId => renderer.Render(artifact, artifactId),
+            cancellationToken);
+
         return new SavedArtifact(filePath);
     }
 }

@@ -12,13 +12,15 @@ public sealed class ArtifactFileStore(ArtifactFileNameGenerator fileNames) : IAr
     public async Task<string> SaveAsync(
         string directoryPath,
         string fileNameStem,
-        string markdown,
+        Func<string, string> renderMarkdown,
         CancellationToken cancellationToken = default)
     {
         Directory.CreateDirectory(directoryPath);
 
         var filePath = NextAvailablePath(directoryPath, fileNameStem);
-        await File.WriteAllTextAsync(filePath, markdown, cancellationToken);
+        var artifactId = Path.GetFileNameWithoutExtension(filePath);
+
+        await File.WriteAllTextAsync(filePath, renderMarkdown(artifactId), cancellationToken);
         return filePath;
     }
 

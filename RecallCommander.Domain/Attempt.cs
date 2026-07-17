@@ -12,9 +12,21 @@ public sealed class Attempt
 
     public DateTimeOffset CreatedAtUtc { get; }
 
+    /// <summary>
+    /// The artifact id of the assessment this attempt was made against
+    /// (e.g. "assessment-2026-07-17-001"), preserved from the assessment's
+    /// frontmatter through Save As. Null when the document carries no
+    /// assessment identity.
+    /// </summary>
+    public string? AssessmentId { get; }
+
     public IReadOnlyList<AttemptQuestion> Questions { get; }
 
-    public Attempt(string title, DateTimeOffset createdAtUtc, IEnumerable<AttemptQuestion> questions)
+    public Attempt(
+        string title,
+        DateTimeOffset createdAtUtc,
+        IEnumerable<AttemptQuestion> questions,
+        string? assessmentId = null)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
@@ -29,6 +41,7 @@ public sealed class Attempt
 
         Title = title.Trim();
         CreatedAtUtc = createdAtUtc;
+        AssessmentId = string.IsNullOrWhiteSpace(assessmentId) ? null : assessmentId.Trim();
         Questions = questionList;
     }
 }

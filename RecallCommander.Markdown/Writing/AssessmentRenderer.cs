@@ -12,14 +12,16 @@ namespace RecallCommander.Markdown.Writing;
 /// </summary>
 public sealed class AssessmentRenderer : IArtifactRenderer<Assessment>
 {
-    private const string Slug = "assessment";
-    private const string DirectoryName = "Assessments";
+    public string Slug => "assessment";
 
-    public ArtifactContent Render(Assessment assessment)
+    public string DirectoryName => "Assessments";
+
+    public string Render(Assessment assessment, string artifactId)
     {
         var builder = new MarkdownArtifactBuilder()
             .WithFrontmatter(new AssessmentFrontmatter(
                 Slug,
+                artifactId,
                 assessment.Title,
                 assessment.CreatedAtUtc,
                 assessment.Questions.Count))
@@ -35,11 +37,12 @@ public sealed class AssessmentRenderer : IArtifactRenderer<Assessment>
                 .AppendHeading(3, "Answer");
         }
 
-        return new ArtifactContent(Slug, DirectoryName, builder.Build());
+        return builder.Build();
     }
 
     private sealed record AssessmentFrontmatter(
         string Type,
+        string Id,
         string Title,
         DateTimeOffset Created,
         int QuestionCount);

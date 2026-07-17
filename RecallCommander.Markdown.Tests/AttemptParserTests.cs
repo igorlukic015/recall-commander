@@ -500,15 +500,144 @@ public sealed class AttemptParserTests
                 new AssessmentQuestion("Explain garbage collection generations."),
             ]);
 
-        var rendered = new AssessmentRenderer().Render(assessment);
-        var result = _parser.Parse(rendered.Markdown);
+        var rendered = new AssessmentRenderer().Render(assessment, "assessment-2026-07-17-001");
+        var result = _parser.Parse(rendered);
 
         Assert.True(result.IsValid);
         Assert.Equal(assessment.Title, result.Attempt.Title);
         Assert.Equal(assessment.CreatedAtUtc, result.Attempt.CreatedAtUtc);
+        Assert.Equal("assessment-2026-07-17-001", result.Attempt.AssessmentId);
         Assert.Equal(
             assessment.Questions.Select(question => question.Prompt),
             result.Attempt.Questions.Select(question => question.Prompt));
         Assert.All(result.Attempt.Questions, question => Assert.False(question.IsAnswered));
+    }
+
+    [Fact]
+    public void Accepts_the_full_generated_assessment_metadata()
+    {
+        var markdown =
+            """
+            ---
+            type: assessment
+            id: assessment-2026-07-17-001
+            title: C# Assessment
+            created: 2026-07-17T09:30:00
+            question_count: 1
+            ---
+
+            ## Question 1
+
+            What is boxing in C#?
+
+            ### Answer
+
+            Boxing wraps a value type in an object.
+            """;
+
+        var result = _parser.Parse(markdown);
+
+        Assert.True(result.IsValid);
+        Assert.Empty(result.Diagnostics);
+        Assert.Equal("assessment-2026-07-17-001", result.Attempt.AssessmentId);
+    }
+
+    [Fact]
+    public void An_explicit_assessment_reference_is_the_assessment_identity()
+    {
+        var markdown =
+            """
+            ---
+            type: assessment
+            assessment: assessment-2026-07-17-001
+            created: 2026-07-17T10:15:00
+            ---
+
+            # C# Assessment
+
+            ## Question 1
+
+            What is boxing in C#?
+
+            ### Answer
+
+            An answer.
+            """;
+
+        var result = _parser.Parse(markdown);
+
+        Assert.True(result.IsValid);
+        Assert.Equal("assessment-2026-07-17-001", result.Attempt.AssessmentId);
+    }
+
+    [Fact]
+    public void An_explicit_assessment_reference_wins_over_the_id_field()
+    {
+        var markdown =
+            """
+            ---
+            type: assessment
+            id: some-other-id
+            assessment: assessment-2026-07-17-001
+            title: C# Assessment
+            created: 2026-07-17T10:15:00
+            ---
+
+            ## Question 1
+
+            Prompt?
+
+            ### Answer
+            """;
+
+        var result = _parser.Parse(markdown);
+
+        Assert.True(result.IsValid);
+        Assert.Equal("assessment-2026-07-17-001", result.Attempt.AssessmentId);
+    }
+
+    [Fact]
+    public void Assessment_identity_is_optional()
+    {
+        var markdown =
+            $"""
+            {Frontmatter}
+
+            ## Question 1
+
+            Prompt?
+
+            ### Answer
+            """;
+
+        var result = _parser.Parse(markdown);
+
+        Assert.True(result.IsValid);
+        Assert.Null(result.Attempt.AssessmentId);
+    }
+
+    [Fact]
+    public void The_assessment_attempt_type_is_not_supported()
+    {
+        var markdown =
+            """
+            ---
+            type: assessment-attempt
+            title: C# Assessment
+            created: 2026-07-17T10:15:00
+            ---
+
+            ## Question 1
+
+            Prompt?
+
+            ### Answer
+            """;
+
+        var result = _parser.Parse(markdown);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Diagnostics, diagnostic =>
+            diagnostic.Message.Contains("Unexpected document type 'assessment-attempt'"));
     }
 }

@@ -26,7 +26,7 @@ public sealed class ArtifactStoreTests : IDisposable
             .AppendHeading(1, "Test")
             .Build();
 
-        var path = await _store.SaveAsync(directory, "assessment-2026-07-16", document);
+        var path = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => document);
 
         Assert.True(Directory.Exists(directory));
         Assert.Equal(document, await File.ReadAllTextAsync(path));
@@ -37,9 +37,9 @@ public sealed class ArtifactStoreTests : IDisposable
     {
         var directory = Path.Combine(_workspace.Root, "Assessments");
 
-        var first = await _store.SaveAsync(directory, "assessment-2026-07-16", "one");
-        var second = await _store.SaveAsync(directory, "assessment-2026-07-16", "two");
-        var third = await _store.SaveAsync(directory, "assessment-2026-07-16", "three");
+        var first = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => "one");
+        var second = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => "two");
+        var third = await _store.SaveAsync(directory, "assessment-2026-07-16", _ => "three");
 
         Assert.Equal("assessment-2026-07-16-001.md", Path.GetFileName(first));
         Assert.Equal("assessment-2026-07-16-002.md", Path.GetFileName(second));
@@ -53,9 +53,24 @@ public sealed class ArtifactStoreTests : IDisposable
     {
         var directory = Path.Combine(_workspace.Root, "Assessments");
 
-        await _store.SaveAsync(directory, "assessment-2026-07-16", "a");
-        var otherDay = await _store.SaveAsync(directory, "assessment-2026-07-17", "b");
+        await _store.SaveAsync(directory, "assessment-2026-07-16", _ => "a");
+        var otherDay = await _store.SaveAsync(directory, "assessment-2026-07-17", _ => "b");
 
         Assert.Equal("assessment-2026-07-17-001.md", Path.GetFileName(otherDay));
+    }
+
+    [Fact]
+    public async Task Rendering_receives_the_artifact_id_matching_the_file_name()
+    {
+        var directory = Path.Combine(_workspace.Root, "Assessments");
+
+        var first = await _store.SaveAsync(directory, "assessment-2026-07-16", id => $"id: {id}");
+        var second = await _store.SaveAsync(directory, "assessment-2026-07-16", id => $"id: {id}");
+
+        Assert.Equal("id: assessment-2026-07-16-001", await File.ReadAllTextAsync(first));
+        Assert.Equal("id: assessment-2026-07-16-002", await File.ReadAllTextAsync(second));
+        Assert.Equal(
+            Path.GetFileNameWithoutExtension(second),
+            (await File.ReadAllTextAsync(second))["id: ".Length..]);
     }
 }
