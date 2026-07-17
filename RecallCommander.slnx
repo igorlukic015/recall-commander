@@ -7,4 +7,5 @@
   <Project Path="RecallCommander.Domain.Tests/RecallCommander.Domain.Tests.csproj" />
   <Project Path="RecallCommander.Application.Tests/RecallCommander.Application.Tests.csproj" />
   <Project Path="RecallCommander.Markdown.Tests/RecallCommander.Markdown.Tests.csproj" />
+  <Project Path="RecallCommander.IntegrationTests/RecallCommander.IntegrationTests.csproj" />
 </Solution>
