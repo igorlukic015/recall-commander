@@ -1,4 +1,4 @@
-using RecallCommander.Application.Abstractions;
+using RecallCommander.Contracts.Attempts;
 
 namespace RecallCommander.Application.Tests.Fakes;
 

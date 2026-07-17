@@ -1,6 +1,6 @@
 using System.Globalization;
 using Dapper;
-using RecallCommander.Application.Abstractions;
+using RecallCommander.Contracts.Sources;
 using RecallCommander.Domain;
 
 namespace RecallCommander.Infrastructure.Database;

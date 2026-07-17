@@ -1,17 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
+using RecallCommander.Contracts.Parsing;
 using RecallCommander.Domain;
 
-namespace RecallCommander.Application.Abstractions;
-
-/// <summary>
-/// Parses a completed assessment Markdown document into an <see cref="Attempt"/>.
-/// Problems are reported as diagnostics; parsing always continues so every
-/// problem in the document is reported at once.
-/// </summary>
-public interface IAttemptParser
-{
-    AttemptParseResult Parse(string markdown);
-}
+namespace RecallCommander.Contracts.Attempts;
 
 /// <summary>
 /// The outcome of parsing one attempt document. The attempt is only present

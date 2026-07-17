@@ -1,4 +1,4 @@
-namespace RecallCommander.Application.Artifacts;
+namespace RecallCommander.Contracts.Artifacts;
 
 /// <summary>
 /// Renders one artifact type (Assessment, Attempt, Review, ...) to Markdown.

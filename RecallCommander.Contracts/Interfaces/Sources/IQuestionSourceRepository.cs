@@ -1,6 +1,6 @@
 using RecallCommander.Domain;
 
-namespace RecallCommander.Application.Abstractions;
+namespace RecallCommander.Contracts.Sources;
 
 /// <summary>
 /// Persistence for registered question sources. Only source metadata is stored;

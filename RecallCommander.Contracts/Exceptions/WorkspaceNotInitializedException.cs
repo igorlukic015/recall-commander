@@ -1,4 +1,4 @@
-namespace RecallCommander.Application.Exceptions;
+namespace RecallCommander.Contracts.Exceptions;
 
 /// <summary>
 /// Thrown when a workflow requires the metadata store but 'rc init' has not been run.

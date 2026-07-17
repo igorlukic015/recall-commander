@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using RecallCommander.Application;
-using RecallCommander.Application.Exceptions;
 using RecallCommander.Cli.Commands;
 using RecallCommander.Cli.Infrastructure;
+using RecallCommander.Contracts.Exceptions;
 using RecallCommander.Infrastructure;
 using RecallCommander.Markdown;
 using Spectre.Console;

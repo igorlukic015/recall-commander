@@ -1,7 +1,8 @@
 using Xunit;
-using RecallCommander.Application.Abstractions;
 using RecallCommander.Application.Attempts;
 using RecallCommander.Application.Tests.Fakes;
+using RecallCommander.Contracts.Attempts;
+using RecallCommander.Contracts.Parsing;
 using RecallCommander.Domain;
 
 namespace RecallCommander.Application.Tests.Attempts;

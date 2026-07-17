@@ -26,6 +26,7 @@ The system is not responsible for storing user knowledge.
 Recall Commander is divided into separate layers:
 
 * Domain layer
+* Contracts layer
 * Application layer
 * Infrastructure layer
 * Presentation layer
@@ -45,16 +46,24 @@ Presentation
 Application
       |
       v
+Contracts
+      |
+      v
 Domain
 
 
-Infrastructure
-      |
-      v
-Application
+Infrastructure          Markdown
+      |                     |
+      v                     v
+   Contracts  <-------------+
 ```
 
 The Domain layer has no dependencies on external systems.
+
+Infrastructure and Markdown implement the interfaces defined in Contracts
+without depending on Application: they reference Contracts (and Domain)
+directly, so the concrete workflows in Application stay free to change
+without forcing a rebuild of either implementation project.
 
 ---
 
@@ -69,6 +78,8 @@ RecallCommander/
 ├── RecallCommander.Cli/
 │
 ├── RecallCommander.Application/
+│
+├── RecallCommander.Contracts/
 │
 ├── RecallCommander.Domain/
 │
@@ -144,6 +155,51 @@ Domain/
 
 ---
 
+## RecallCommander.Contracts
+
+The Contracts project holds the abstractions shared across layer
+boundaries: interfaces implemented by Infrastructure and Markdown, and the
+models that travel through those interfaces' signatures. It depends only on
+Domain.
+
+A type belongs here when something other than Application needs it without
+depending on Application itself — for example a repository interface
+implemented by Infrastructure, or the parse-result record an implementation
+returns. Result and status DTOs owned by a single concrete Application
+service (nothing implements them elsewhere) stay in Application instead.
+
+Example structure:
+
+```
+Contracts/
+
+    Interfaces/
+
+        Sources/
+            IQuestionSourceRepository.cs
+
+        FileSystem/
+            IFileSystem.cs
+
+        Artifacts/
+            IArtifactRenderer.cs
+            IArtifactStore.cs
+
+    Models/
+
+        Questions/
+            QuestionParseResult.cs
+
+        Artifacts/
+            SavedArtifact.cs
+
+    Exceptions/
+
+        WorkspaceNotInitializedException.cs
+```
+
+---
+
 ## RecallCommander.Application
 
 The Application project contains use cases.
@@ -170,7 +226,8 @@ Application/
         ReviewAttemptService.cs
 ```
 
-The Application layer should depend on abstractions rather than concrete implementations.
+The Application layer should depend on the interfaces in Contracts rather
+than concrete implementations.
 
 ---
 
@@ -368,7 +425,7 @@ Application Services
 
     ↓
 
-Interfaces
+Interfaces (Contracts)
 
     ↓
 
@@ -511,6 +568,8 @@ The architecture should remain simple until real requirements appear.
 Recall Commander is designed as a modular assessment engine.
 
 The domain defines what the system means.
+
+Contracts define the boundaries between layers.
 
 The application defines what the system does.
 

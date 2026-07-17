@@ -3,6 +3,8 @@ using RecallCommander.Application.Artifacts;
 using RecallCommander.Application.Assessments;
 using RecallCommander.Application.Scanning;
 using RecallCommander.Application.Tests.Fakes;
+using RecallCommander.Contracts.Artifacts;
+using RecallCommander.Contracts.Assessments;
 using RecallCommander.Domain;
 
 namespace RecallCommander.Application.Tests.Assessments;

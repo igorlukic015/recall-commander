@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
-using RecallCommander.Application.Abstractions;
-using RecallCommander.Application.Artifacts;
+using RecallCommander.Contracts.Artifacts;
+using RecallCommander.Contracts.FileSystem;
+using RecallCommander.Contracts.Sources;
+using RecallCommander.Contracts.Workspace;
 using RecallCommander.Infrastructure.Artifacts;
 using RecallCommander.Infrastructure.Database;
 using RecallCommander.Infrastructure.FileSystem;

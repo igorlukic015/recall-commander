@@ -1,5 +1,7 @@
 using RecallCommander.Application.Artifacts;
 using RecallCommander.Application.Scanning;
+using RecallCommander.Contracts.Artifacts;
+using RecallCommander.Contracts.Assessments;
 using RecallCommander.Domain;
 
 namespace RecallCommander.Application.Assessments;

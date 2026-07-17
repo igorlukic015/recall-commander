@@ -1,5 +1,5 @@
 using Xunit;
-using RecallCommander.Application.Exceptions;
+using RecallCommander.Contracts.Exceptions;
 using RecallCommander.Infrastructure.Database;
 using RecallCommander.IntegrationTests.Support;
 

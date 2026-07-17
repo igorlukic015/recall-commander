@@ -1,4 +1,4 @@
-using RecallCommander.Application.Abstractions;
+using RecallCommander.Contracts.Questions;
 
 namespace RecallCommander.Application.Scanning;
 

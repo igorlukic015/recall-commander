@@ -1,4 +1,4 @@
-using RecallCommander.Application.Abstractions;
+using RecallCommander.Contracts.Workspace;
 using Spectre.Console;
 using Spectre.Console.Cli;
 

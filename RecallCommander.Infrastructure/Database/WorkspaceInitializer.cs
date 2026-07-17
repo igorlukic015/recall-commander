@@ -1,6 +1,6 @@
 using Dapper;
 using Microsoft.Data.Sqlite;
-using RecallCommander.Application.Abstractions;
+using RecallCommander.Contracts.Workspace;
 
 namespace RecallCommander.Infrastructure.Database;
 

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
-using RecallCommander.Application.Abstractions;
-using RecallCommander.Application.Artifacts;
+using RecallCommander.Contracts.Artifacts;
+using RecallCommander.Contracts.Attempts;
+using RecallCommander.Contracts.Questions;
 using RecallCommander.Domain;
 using RecallCommander.Markdown.Parsing;
 using RecallCommander.Markdown.Writing;

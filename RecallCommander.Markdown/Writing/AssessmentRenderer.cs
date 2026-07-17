@@ -1,4 +1,4 @@
-using RecallCommander.Application.Artifacts;
+using RecallCommander.Contracts.Artifacts;
 using RecallCommander.Domain;
 
 namespace RecallCommander.Markdown.Writing;

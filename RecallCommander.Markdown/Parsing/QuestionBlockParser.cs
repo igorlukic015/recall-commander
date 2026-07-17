@@ -1,6 +1,7 @@
 using Markdig;
 using Markdig.Syntax;
-using RecallCommander.Application.Abstractions;
+using RecallCommander.Contracts.Parsing;
+using RecallCommander.Contracts.Questions;
 using RecallCommander.Domain;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;

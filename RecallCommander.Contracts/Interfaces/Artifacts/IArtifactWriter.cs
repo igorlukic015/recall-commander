@@ -1,4 +1,4 @@
-namespace RecallCommander.Application.Artifacts;
+namespace RecallCommander.Contracts.Artifacts;
 
 /// <summary>
 /// Renders an artifact to Markdown and persists it as a new file.
@@ -9,6 +9,3 @@ public interface IArtifactWriter<in T>
 {
     Task<SavedArtifact> WriteAsync(T artifact, CancellationToken cancellationToken = default);
 }
-
-/// <summary>Where a written artifact ended up.</summary>
-public sealed record SavedArtifact(string FilePath);

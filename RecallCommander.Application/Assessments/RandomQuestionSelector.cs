@@ -1,3 +1,4 @@
+using RecallCommander.Contracts.Assessments;
 using RecallCommander.Domain;
 
 namespace RecallCommander.Application.Assessments;

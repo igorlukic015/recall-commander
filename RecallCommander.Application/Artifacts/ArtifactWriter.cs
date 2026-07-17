@@ -1,3 +1,5 @@
+using RecallCommander.Contracts.Artifacts;
+
 namespace RecallCommander.Application.Artifacts;
 
 /// <summary>

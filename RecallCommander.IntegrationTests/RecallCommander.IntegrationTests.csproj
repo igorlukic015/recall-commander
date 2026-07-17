@@ -14,6 +14,7 @@
     <ItemGroup>
         <ProjectReference Include="../RecallCommander.Application/RecallCommander.Application.csproj" />
         <ProjectReference Include="../RecallCommander.Cli/RecallCommander.Cli.csproj" />
+        <ProjectReference Include="../RecallCommander.Contracts/RecallCommander.Contracts.csproj" />
         <ProjectReference Include="../RecallCommander.Domain/RecallCommander.Domain.csproj" />
         <ProjectReference Include="../RecallCommander.Infrastructure/RecallCommander.Infrastructure.csproj" />
         <ProjectReference Include="../RecallCommander.Markdown/RecallCommander.Markdown.csproj" />

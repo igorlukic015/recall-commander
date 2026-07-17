@@ -1,6 +1,6 @@
 using RecallCommander.Domain;
 
-namespace RecallCommander.Application.Assessments;
+namespace RecallCommander.Contracts.Assessments;
 
 /// <summary>
 /// Chooses which discovered questions go into an assessment. The MVP picks

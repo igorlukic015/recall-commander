@@ -1,4 +1,4 @@
-namespace RecallCommander.Application.Artifacts;
+namespace RecallCommander.Contracts.Artifacts;
 
 /// <summary>
 /// Decides where generated artifacts are written.

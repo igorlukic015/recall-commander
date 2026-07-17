@@ -1,6 +1,7 @@
 using Xunit;
 using Microsoft.Extensions.DependencyInjection;
 using RecallCommander.Application.Artifacts;
+using RecallCommander.Contracts.Artifacts;
 
 namespace RecallCommander.Application.Tests.Artifacts;
 

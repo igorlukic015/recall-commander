@@ -1,5 +1,6 @@
 using Xunit;
 using RecallCommander.Application.Artifacts;
+using RecallCommander.Contracts.Artifacts;
 
 namespace RecallCommander.Application.Tests.Artifacts;
 

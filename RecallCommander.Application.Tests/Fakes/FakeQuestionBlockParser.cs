@@ -1,4 +1,5 @@
-using RecallCommander.Application.Abstractions;
+using RecallCommander.Contracts.Parsing;
+using RecallCommander.Contracts.Questions;
 using RecallCommander.Domain;
 
 namespace RecallCommander.Application.Tests.Fakes;

@@ -1,5 +1,5 @@
-using RecallCommander.Application.Abstractions;
-using RecallCommander.Application.Artifacts;
+using RecallCommander.Contracts.Artifacts;
+using RecallCommander.Contracts.Sources;
 using RecallCommander.Domain;
 using RecallCommander.Infrastructure.Database;
 

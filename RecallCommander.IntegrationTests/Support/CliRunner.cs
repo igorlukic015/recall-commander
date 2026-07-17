@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
-using RecallCommander.Application.Artifacts;
 using RecallCommander.Cli;
+using RecallCommander.Contracts.Artifacts;
 using RecallCommander.Infrastructure.Database;
 using Spectre.Console;
 using Spectre.Console.Testing;

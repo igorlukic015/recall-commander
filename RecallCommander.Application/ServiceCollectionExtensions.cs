@@ -4,6 +4,8 @@ using RecallCommander.Application.Assessments;
 using RecallCommander.Application.Attempts;
 using RecallCommander.Application.Scanning;
 using RecallCommander.Application.Sources;
+using RecallCommander.Contracts.Artifacts;
+using RecallCommander.Contracts.Assessments;
 
 namespace RecallCommander.Application;
 

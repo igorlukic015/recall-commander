@@ -1,4 +1,4 @@
-namespace RecallCommander.Application.Artifacts;
+namespace RecallCommander.Contracts.Artifacts;
 
 /// <summary>
 /// Persists rendered artifacts. Implementations assign the next free sequence

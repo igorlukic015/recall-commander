@@ -1,4 +1,4 @@
-namespace RecallCommander.Application.Abstractions;
+namespace RecallCommander.Contracts.FileSystem;
 
 /// <summary>
 /// Filesystem access required by application workflows.

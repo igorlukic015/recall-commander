@@ -1,4 +1,6 @@
-using RecallCommander.Application.Abstractions;
+using RecallCommander.Contracts.FileSystem;
+using RecallCommander.Contracts.Questions;
+using RecallCommander.Contracts.Sources;
 
 namespace RecallCommander.Application.Scanning;
 

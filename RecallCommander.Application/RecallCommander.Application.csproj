@@ -5,6 +5,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="../RecallCommander.Contracts/RecallCommander.Contracts.csproj" />
         <ProjectReference Include="../RecallCommander.Domain/RecallCommander.Domain.csproj" />
     </ItemGroup>
 

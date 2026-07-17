@@ -1,5 +1,5 @@
 using Microsoft.Data.Sqlite;
-using RecallCommander.Application.Exceptions;
+using RecallCommander.Contracts.Exceptions;
 
 namespace RecallCommander.Infrastructure.Database;
 

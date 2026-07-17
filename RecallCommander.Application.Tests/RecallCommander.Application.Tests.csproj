@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="../RecallCommander.Application/RecallCommander.Application.csproj" />
+        <ProjectReference Include="../RecallCommander.Contracts/RecallCommander.Contracts.csproj" />
         <ProjectReference Include="../RecallCommander.Domain/RecallCommander.Domain.csproj" />
     </ItemGroup>
 

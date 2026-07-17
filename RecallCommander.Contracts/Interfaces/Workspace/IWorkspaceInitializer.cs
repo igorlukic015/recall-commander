@@ -1,4 +1,4 @@
-namespace RecallCommander.Application.Abstractions;
+namespace RecallCommander.Contracts.Workspace;
 
 /// <summary>
 /// Creates the application metadata store. Safe to call repeatedly.
@@ -7,5 +7,3 @@ public interface IWorkspaceInitializer
 {
     Task<InitializationResult> InitializeAsync(CancellationToken cancellationToken = default);
 }
-
-public sealed record InitializationResult(bool Created, string DatabasePath);
