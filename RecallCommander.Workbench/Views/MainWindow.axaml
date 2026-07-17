@@ -5,103 +5,284 @@
         x:Class="RecallCommander.Workbench.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Recall Commander"
-        Width="760" Height="860"
-        MinWidth="560" MinHeight="640">
+        Icon="/Assets/logo.png"
+        Width="1080" Height="680"
+        MinWidth="800" MinHeight="520"
+        Background="{DynamicResource WindowBackgroundBrush}">
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="F2" Command="{Binding AddSourceCommand}" />
+        <KeyBinding Gesture="F3" Command="{Binding ScanSourcesCommand}" />
+        <KeyBinding Gesture="F4" Command="{Binding CreateAssessmentCommand}" />
+        <KeyBinding Gesture="F5" Command="{Binding ValidateAttemptCommand}" />
+    </Window.KeyBindings>
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#1B1E23" />
+                    <SolidColorBrush x:Key="BarBackgroundBrush" Color="#24282E" />
+                    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#22262C" />
+                    <SolidColorBrush x:Key="PanelBorderBrush" Color="#3A404B" />
+                    <SolidColorBrush x:Key="PanelHeaderBackgroundBrush" Color="#2C4F8A" />
+                    <SolidColorBrush x:Key="PanelHeaderForegroundBrush" Color="#F0F3F7" />
+                    <SolidColorBrush x:Key="ColumnHeaderForegroundBrush" Color="#8B93A1" />
+                    <SolidColorBrush x:Key="ColumnHeaderBackgroundBrush" Color="#262B31" />
+                    <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#20242A" />
+                    <SolidColorBrush x:Key="StatusBarForegroundBrush" Color="#9AA3B0" />
+                    <SolidColorBrush x:Key="ToolbarButtonBackgroundBrush" Color="#2B2F36" />
+                    <SolidColorBrush x:Key="ToolbarButtonForegroundBrush" Color="#C9CED6" />
+                    <SolidColorBrush x:Key="FnKeyBarBackgroundBrush" Color="#191C20" />
+                    <SolidColorBrush x:Key="FnKeyBackgroundBrush" Color="#2A2E35" />
+                    <SolidColorBrush x:Key="FnKeyForegroundBrush" Color="#C9CED6" />
+                    <SolidColorBrush x:Key="FnKeyBorderBrush" Color="#191C20" />
+                    <SolidColorBrush x:Key="FnLabelForegroundBrush" Color="#7FB4E8" />
+                    <SolidColorBrush x:Key="MutedForegroundBrush" Color="#9AA3B0" />
+                </ResourceDictionary>
+
+                <!-- Classic Total Commander: white panels, navy title bars,
+                     Windows button-face gray chrome. -->
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#F0F0F0" />
+                    <SolidColorBrush x:Key="BarBackgroundBrush" Color="#F0F0F0" />
+                    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="PanelBorderBrush" Color="#A6A6A6" />
+                    <SolidColorBrush x:Key="PanelHeaderBackgroundBrush" Color="#000080" />
+                    <SolidColorBrush x:Key="PanelHeaderForegroundBrush" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="ColumnHeaderForegroundBrush" Color="#333333" />
+                    <SolidColorBrush x:Key="ColumnHeaderBackgroundBrush" Color="#F0F0F0" />
+                    <SolidColorBrush x:Key="StatusBarBackgroundBrush" Color="#F0F0F0" />
+                    <SolidColorBrush x:Key="StatusBarForegroundBrush" Color="#202020" />
+                    <SolidColorBrush x:Key="ToolbarButtonBackgroundBrush" Color="#E1E1E1" />
+                    <SolidColorBrush x:Key="ToolbarButtonForegroundBrush" Color="#000000" />
+                    <SolidColorBrush x:Key="FnKeyBarBackgroundBrush" Color="#F0F0F0" />
+                    <SolidColorBrush x:Key="FnKeyBackgroundBrush" Color="#E1E1E1" />
+                    <SolidColorBrush x:Key="FnKeyForegroundBrush" Color="#000000" />
+                    <SolidColorBrush x:Key="FnKeyBorderBrush" Color="#ADADAD" />
+                    <SolidColorBrush x:Key="FnLabelForegroundBrush" Color="#000080" />
+                    <SolidColorBrush x:Key="MutedForegroundBrush" Color="#404040" />
+                </ResourceDictionary>
+
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
 
     <Window.Styles>
-        <Style Selector="TextBlock.sectionHeader">
-            <Setter Property="FontSize" Value="16" />
-            <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Margin" Value="0,0,0,8" />
+        <Style Selector="Button">
+            <Setter Property="CornerRadius" Value="0" />
         </Style>
-        <Style Selector="Separator">
-            <Setter Property="Margin" Value="0,16" />
+
+        <Style Selector="Button.toolbar">
+            <Setter Property="Background" Value="{DynamicResource ToolbarButtonBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource ToolbarButtonForegroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="10,4" />
+        </Style>
+
+        <Style Selector="Button.fnKey">
+            <Setter Property="Background" Value="{DynamicResource FnKeyBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource FnKeyForegroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource FnKeyBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="0,6" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style Selector="Border.panel">
+            <Setter Property="Background" Value="{DynamicResource PanelBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style Selector="Border.panelHeader">
+            <Setter Property="Background" Value="{DynamicResource PanelHeaderBackgroundBrush}" />
+            <Setter Property="Padding" Value="8,3" />
+        </Style>
+        <Style Selector="Border.panelHeader TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource PanelHeaderForegroundBrush}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style Selector="Border.columnHeader">
+            <Setter Property="Background" Value="{DynamicResource ColumnHeaderBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Padding" Value="8,2" />
+        </Style>
+        <Style Selector="Border.columnHeader TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource ColumnHeaderForegroundBrush}" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <Style Selector="Border.statusBar">
+            <Setter Property="Background" Value="{DynamicResource StatusBarBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,1,0,0" />
+            <Setter Property="Padding" Value="8,2" />
+        </Style>
+        <Style Selector="Border.statusBar TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource StatusBarForegroundBrush}" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
+        <Style Selector="ListBox.panelList">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontFamily" Value="Consolas,Cascadia Mono,DejaVu Sans Mono,monospace" />
+        </Style>
+        <Style Selector="ListBox.panelList ListBoxItem">
+            <Setter Property="Padding" Value="8,2" />
+            <Setter Property="MinHeight" Value="0" />
         </Style>
     </Window.Styles>
 
-    <Grid Margin="16" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,*">
+    <DockPanel>
 
-        <TextBlock Grid.Row="0"
-                   Text="Recall Commander"
-                   FontSize="22"
-                   FontWeight="SemiBold"
-                   Margin="0,0,0,16" />
+        <!-- Menu bar -->
+        <Menu DockPanel.Dock="Top" Background="{DynamicResource BarBackgroundBrush}">
+            <MenuItem Header="_Sources">
+                <MenuItem Header="_Add Source" InputGesture="F2" Command="{Binding AddSourceCommand}" />
+                <MenuItem Header="_Remove Source" IsEnabled="False" />
+                <Separator />
+                <MenuItem Header="S_can Sources" InputGesture="F3" Command="{Binding ScanSourcesCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Assessment">
+                <MenuItem Header="_Create Assessment" InputGesture="F4" Command="{Binding CreateAssessmentCommand}" />
+                <MenuItem Header="_Validate Attempt" InputGesture="F5" Command="{Binding ValidateAttemptCommand}" />
+            </MenuItem>
+            <MenuItem Header="Con_figuration">
+                <MenuItem Header="_Light Mode" Click="OnLightModeClick" />
+                <MenuItem Header="_Dark Mode" Click="OnDarkModeClick" />
+            </MenuItem>
+            <MenuItem Header="_Commands">
+                <MenuItem Header="E_xit" InputGesture="Alt+F4" Click="OnExitClick" />
+            </MenuItem>
+        </Menu>
 
-        <!-- Question Sources -->
-        <StackPanel Grid.Row="1">
-            <TextBlock Classes="sectionHeader" Text="Question Sources" />
+        <!-- Toolbar -->
+        <Border DockPanel.Dock="Top" Background="{DynamicResource BarBackgroundBrush}"
+                BorderBrush="{DynamicResource PanelBorderBrush}" BorderThickness="0,1" Padding="6,4">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <Image Source="/Assets/logo.png"
+                       Height="26"
+                       Margin="2,0,4,0"
+                       VerticalAlignment="Center"
+                       RenderOptions.BitmapInterpolationMode="HighQuality" />
 
-            <ListBox ItemsSource="{Binding Sources}"
-                     SelectedItem="{Binding SelectedSource}"
-                     Height="140">
-                <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="domain:QuestionSource">
-                        <TextBlock Text="{Binding DirectoryPath}" />
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
+                <Border Width="1" Background="{DynamicResource PanelBorderBrush}" Margin="0,0,4,0" />
 
-            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
-                <Button Content="Add Source" Command="{Binding AddSourceCommand}" />
+                <Button Classes="toolbar" Content="Add Source" Command="{Binding AddSourceCommand}" />
 
                 <!-- The border carries the tooltip: disabled controls do not
                      always trigger tooltips themselves. -->
                 <Border Background="Transparent" ToolTip.Tip="Not implemented yet.">
-                    <Button Content="Remove Source" IsEnabled="False" />
+                    <Button Classes="toolbar" Content="Remove Source" IsEnabled="False" />
                 </Border>
 
-                <Button Content="Scan Sources" Command="{Binding ScanSourcesCommand}" />
-            </StackPanel>
-        </StackPanel>
+                <Button Classes="toolbar" Content="Scan Sources" Command="{Binding ScanSourcesCommand}" />
 
-        <Separator Grid.Row="2" />
+                <Border Width="1" Background="{DynamicResource PanelBorderBrush}" Margin="4,0" />
 
-        <!-- Questions -->
-        <StackPanel Grid.Row="3" Spacing="4">
-            <TextBlock Classes="sectionHeader" Text="Questions" />
-            <TextBlock Text="{Binding Sources.Count, StringFormat='Registered sources: {0}'}" />
-            <TextBlock Text="{Binding DiscoveredQuestionsText}" />
-        </StackPanel>
-
-        <Separator Grid.Row="4" />
-
-        <!-- Assessment -->
-        <StackPanel Grid.Row="5">
-            <TextBlock Classes="sectionHeader" Text="Assessment" />
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="Question Count" VerticalAlignment="Center" />
+                <TextBlock Text="Questions:" Foreground="{DynamicResource MutedForegroundBrush}" VerticalAlignment="Center" />
                 <NumericUpDown Value="{Binding QuestionCount}"
                                Minimum="1"
                                Increment="1"
                                FormatString="0"
-                               Width="130" />
-                <Button Content="Create Assessment" Command="{Binding CreateAssessmentCommand}" />
+                               Width="110" />
+                <Button Classes="toolbar" Content="Create Assessment" Command="{Binding CreateAssessmentCommand}" />
+                <Button Classes="toolbar" Content="Validate Attempt" Command="{Binding ValidateAttemptCommand}" />
             </StackPanel>
-        </StackPanel>
+        </Border>
 
-        <Separator Grid.Row="6" />
+        <!-- Function key bar -->
+        <UniformGrid DockPanel.Dock="Bottom" Columns="6" Background="{DynamicResource FnKeyBarBackgroundBrush}">
+            <Button Classes="fnKey" Command="{Binding AddSourceCommand}">
+                <TextBlock>
+                    <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F2" /><Run Text=" Add Source" />
+                </TextBlock>
+            </Button>
+            <Button Classes="fnKey" Command="{Binding ScanSourcesCommand}">
+                <TextBlock>
+                    <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F3" /><Run Text=" Scan" />
+                </TextBlock>
+            </Button>
+            <Button Classes="fnKey" Command="{Binding CreateAssessmentCommand}">
+                <TextBlock>
+                    <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F4" /><Run Text=" Create" />
+                </TextBlock>
+            </Button>
+            <Button Classes="fnKey" Command="{Binding ValidateAttemptCommand}">
+                <TextBlock>
+                    <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F5" /><Run Text=" Validate" />
+                </TextBlock>
+            </Button>
+            <Button Classes="fnKey" IsEnabled="False">
+                <TextBlock>
+                    <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F8" /><Run Text=" Remove" />
+                </TextBlock>
+            </Button>
+            <Button Classes="fnKey" Click="OnExitClick">
+                <TextBlock>
+                    <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="Alt+F4" /><Run Text=" Exit" />
+                </TextBlock>
+            </Button>
+        </UniformGrid>
 
-        <!-- Attempt -->
-        <StackPanel Grid.Row="7">
-            <TextBlock Classes="sectionHeader" Text="Attempt" />
-            <Button Content="Validate Attempt"
-                    Command="{Binding ValidateAttemptCommand}"
-                    HorizontalAlignment="Left" />
-        </StackPanel>
+        <!-- Dual panels -->
+        <Grid ColumnDefinitions="*,4,*" Margin="4">
 
-        <Separator Grid.Row="8" />
+            <!-- Left panel: question sources -->
+            <Border Grid.Column="0" Classes="panel">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Classes="panelHeader">
+                        <TextBlock Text="Question Sources" />
+                    </Border>
+                    <Border DockPanel.Dock="Top" Classes="columnHeader">
+                        <TextBlock Text="Path" />
+                    </Border>
+                    <Border DockPanel.Dock="Bottom" Classes="statusBar">
+                        <TextBlock Text="{Binding Sources.Count, StringFormat='{}{0} source(s) registered'}" />
+                    </Border>
+                    <ListBox Classes="panelList"
+                             ItemsSource="{Binding Sources}"
+                             SelectedItem="{Binding SelectedSource}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="domain:QuestionSource">
+                                <TextBlock Text="{Binding DirectoryPath}" />
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
 
-        <!-- Output -->
-        <Grid Grid.Row="9" RowDefinitions="Auto,*">
-            <TextBlock Grid.Row="0" Classes="sectionHeader" Text="Output" />
-            <TextBox Grid.Row="1"
-                     Text="{Binding OutputText, Mode=OneWay}"
-                     IsReadOnly="True"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto" />
+            <GridSplitter Grid.Column="1" Background="{DynamicResource WindowBackgroundBrush}" ResizeDirection="Columns" />
+
+            <!-- Right panel: output log -->
+            <Border Grid.Column="2" Classes="panel">
+                <DockPanel>
+                    <Border DockPanel.Dock="Top" Classes="panelHeader">
+                        <TextBlock Text="Output" />
+                    </Border>
+                    <Border DockPanel.Dock="Bottom" Classes="statusBar">
+                        <TextBlock Text="{Binding DiscoveredQuestionsText}" />
+                    </Border>
+                    <TextBox Text="{Binding OutputText, Mode=OneWay}"
+                             IsReadOnly="True"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             FontFamily="Consolas,Cascadia Mono,DejaVu Sans Mono,monospace"
+                             FontSize="12.5"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                </DockPanel>
+            </Border>
+
         </Grid>
 
-    </Grid>
+    </DockPanel>
 
 </Window>
