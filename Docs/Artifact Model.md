@@ -196,9 +196,13 @@ Difference: questions now have answers.
 
 Example:
 
+A Save As does not change the artifact type: the attempt keeps
+`type: assessment`. A file is an attempt because the user hands it to the
+attempt parser, not because it declares a different type.
+
 ```markdown
 ---
-type: assessment-attempt
+type: assessment
 created: 2026-07-13T20:00:00
 assessment: csharp-internals-assessment
 ---

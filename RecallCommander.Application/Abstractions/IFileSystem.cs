@@ -10,6 +10,8 @@ public interface IFileSystem
 
     bool DirectoryExists(string path);
 
+    bool FileExists(string path);
+
     /// <summary>Recursively enumerates Markdown files below a directory, in a stable order.</summary>
     IEnumerable<string> EnumerateMarkdownFiles(string directoryPath);
 

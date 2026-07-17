@@ -1,5 +1,5 @@
 ---
-type: assessment-attempt
+type: assessment
 created: 2026-07-13T20:15:00
 assessment: assessment-csharp-memory-001
 ---

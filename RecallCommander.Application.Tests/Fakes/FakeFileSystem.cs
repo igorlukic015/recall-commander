@@ -31,6 +31,8 @@ public sealed class FakeFileSystem : IFileSystem
 
     public bool DirectoryExists(string path) => _directories.Contains(path);
 
+    public bool FileExists(string path) => _files.ContainsKey(path);
+
     public IEnumerable<string> EnumerateMarkdownFiles(string directoryPath) =>
         _files.Keys
             .Where(file => file.StartsWith(directoryPath + "/", StringComparison.Ordinal))

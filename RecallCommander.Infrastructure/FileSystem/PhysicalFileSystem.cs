@@ -18,6 +18,8 @@ public sealed class PhysicalFileSystem : IFileSystem
 
     public bool DirectoryExists(string path) => Directory.Exists(path);
 
+    public bool FileExists(string path) => File.Exists(path);
+
     public IEnumerable<string> EnumerateMarkdownFiles(string directoryPath) =>
         Directory.EnumerateFiles(directoryPath, "*.md", Recursive)
             .Order(StringComparer.Ordinal);

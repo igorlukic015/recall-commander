@@ -66,6 +66,14 @@ public static class CommandAppFactory
                     .WithDescription("Generate an assessment from discovered questions.");
             });
 
+            config.AddBranch("attempt", attempt =>
+            {
+                attempt.SetDescription("Work with completed assessment attempts.");
+
+                attempt.AddCommand<AttemptValidateCommand>("validate")
+                    .WithDescription("Parse a completed assessment file and report problems.");
+            });
+
             config.SetExceptionHandler((exception, resolver) =>
             {
                 var console = resolver?.Resolve(typeof(IAnsiConsole)) as IAnsiConsole ?? AnsiConsole.Console;

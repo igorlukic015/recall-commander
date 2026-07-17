@@ -12,6 +12,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRecallCommanderMarkdown(this IServiceCollection services)
     {
         services.AddSingleton<IQuestionBlockParser, QuestionBlockParser>();
+        services.AddSingleton<IAttemptParser, AttemptParser>();
         services.AddSingleton<IArtifactRenderer<Assessment>, AssessmentRenderer>();
         return services;
     }

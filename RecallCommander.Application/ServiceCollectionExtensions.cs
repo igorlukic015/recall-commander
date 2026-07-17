@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using RecallCommander.Application.Artifacts;
 using RecallCommander.Application.Assessments;
+using RecallCommander.Application.Attempts;
 using RecallCommander.Application.Scanning;
 using RecallCommander.Application.Sources;
 
@@ -15,6 +16,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ScanService>();
         services.AddSingleton<IQuestionSelector, RandomQuestionSelector>();
         services.AddSingleton<CreateAssessmentService>();
+        services.AddSingleton<ValidateAttemptService>();
         services.AddSingleton<ArtifactFileNameGenerator>();
 
         // Open generic: IArtifactWriter<T> resolves for any T that has a

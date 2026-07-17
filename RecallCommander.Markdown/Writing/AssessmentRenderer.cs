@@ -6,7 +6,9 @@ namespace RecallCommander.Markdown.Writing;
 /// <summary>
 /// Renders an <see cref="Assessment"/> as a readable Markdown document.
 /// Only the question prompts appear; types, concepts and reference answers
-/// are never part of the generated assessment.
+/// are never part of the generated assessment. Every question ends with an
+/// empty '### Answer' heading, ready for the user to fill in when turning a
+/// saved copy of the assessment into an attempt.
 /// </summary>
 public sealed class AssessmentRenderer : IArtifactRenderer<Assessment>
 {
@@ -29,7 +31,8 @@ public sealed class AssessmentRenderer : IArtifactRenderer<Assessment>
             builder
                 .AppendThematicBreak()
                 .AppendHeading(2, $"Question {index + 1}")
-                .AppendMarkdown(assessment.Questions[index].Prompt);
+                .AppendMarkdown(assessment.Questions[index].Prompt)
+                .AppendHeading(3, "Answer");
         }
 
         return new ArtifactContent(Slug, DirectoryName, builder.Build());
