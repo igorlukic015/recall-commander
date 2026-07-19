@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RecallCommander.Application.Assessments;
 using RecallCommander.Application.Attempts;
+using RecallCommander.Application.Reviews;
 using RecallCommander.Application.Scanning;
 using RecallCommander.Application.Sources;
 using RecallCommander.Contracts.Exceptions;
@@ -28,6 +29,7 @@ public partial class MainWindowViewModel(
     ScanService scanner,
     CreateAssessmentService assessments,
     ValidateAttemptService attempts,
+    CreateReviewService reviews,
     AssessmentLocator assessmentLocator,
     IFileSystem fileSystem,
     IExternalFileOpener externalOpener,
@@ -341,6 +343,61 @@ public partial class MainWindowViewModel(
         catch (Exception exception)
         {
             ReportFailure("Could not validate the attempt.", exception);
+        }
+    }
+
+    [RelayCommand]
+    private async Task CreateReviewAsync()
+    {
+        try
+        {
+            if (SelectedAttemptPath is null)
+            {
+                await SelectAttemptAsync();
+            }
+
+            if (SelectedAttemptPath is not { } path)
+            {
+                return;
+            }
+
+            AppendOutput("Creating review...");
+
+            CreateReviewResult result = await reviews.CreateAsync(path);
+
+            switch (result.Status)
+            {
+                case CreateReviewStatus.FileNotFound:
+                    AppendOutput($"File not found: {result.AttemptFilePath}");
+                    break;
+
+                case CreateReviewStatus.InvalidAttempt:
+                    AppendOutput("Attempt is not valid. Fix it and validate again.");
+                    foreach (ParseDiagnostic diagnostic in result.Diagnostics)
+                    {
+                        AppendOutput($"  {result.AttemptFilePath}:{diagnostic.LineNumber} — {diagnostic.Message}");
+                    }
+
+                    break;
+
+                default:
+                    AppendOutput(
+                        $"""
+                         Review created.
+
+                         Path:
+                         {result.ReviewFilePath}
+
+                         Questions:
+                         {result.QuestionCount}
+                         """);
+                    Preview(Path.GetFileName(result.ReviewFilePath!), result.ReviewFilePath!);
+                    break;
+            }
+        }
+        catch (Exception exception)
+        {
+            ReportFailure("Could not create the review.", exception);
         }
     }
 

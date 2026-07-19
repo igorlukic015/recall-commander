@@ -20,6 +20,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ScanService>();
         services.AddSingleton<IQuestionSelector, RandomQuestionSelector>();
         services.AddSingleton<CreateAssessmentService>();
+        services.AddSingleton<AssessmentLocator>();
         services.AddSingleton<ValidateAttemptService>();
         services.AddSingleton<IQuestionEvaluator, FakeQuestionEvaluator>();
         services.AddSingleton<CreateReviewService>();

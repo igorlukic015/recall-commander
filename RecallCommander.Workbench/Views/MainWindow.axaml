@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:RecallCommander.Workbench.ViewModels"
         xmlns:domain="using:RecallCommander.Domain"
-        xmlns:services="using:RecallCommander.Workbench.Services"
+        xmlns:app="using:RecallCommander.Application.Assessments"
         x:Class="RecallCommander.Workbench.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Recall Commander"
@@ -17,6 +17,7 @@
         <KeyBinding Gesture="F4" Command="{Binding CreateAssessmentCommand}" />
         <KeyBinding Gesture="F5" Command="{Binding SelectAttemptCommand}" />
         <KeyBinding Gesture="F6" Command="{Binding ValidateAttemptCommand}" />
+        <KeyBinding Gesture="F7" Command="{Binding CreateReviewCommand}" />
     </Window.KeyBindings>
 
     <Window.Resources>
@@ -184,7 +185,7 @@
                 <MenuItem Header="_Validate Attempt" InputGesture="F6" Command="{Binding ValidateAttemptCommand}" />
             </MenuItem>
             <MenuItem Header="_Review">
-                <MenuItem Header="Coming soon" IsEnabled="False" />
+                <MenuItem Header="_Create Review" InputGesture="F7" Command="{Binding CreateReviewCommand}" />
             </MenuItem>
             <MenuItem Header="Con_figuration">
                 <MenuItem Header="_Light Mode" Click="OnLightModeClick" />
@@ -234,9 +235,7 @@
 
                 <Border Width="1" Background="{DynamicResource PanelBorderBrush}" Margin="4,0" />
 
-                <Border Background="Transparent" ToolTip.Tip="Coming soon.">
-                    <Button Classes="toolbar" Content="Review" IsEnabled="False" />
-                </Border>
+                <Button Classes="toolbar" Content="Create Review" Command="{Binding CreateReviewCommand}" />
             </StackPanel>
         </Border>
 
@@ -267,13 +266,11 @@
                     <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F6" /><Run Text=" Validate" />
                 </TextBlock>
             </Button>
-            <Border Background="Transparent" ToolTip.Tip="Coming soon.">
-                <Button Classes="fnKey" IsEnabled="False" HorizontalAlignment="Stretch">
-                    <TextBlock>
-                        <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F7" /><Run Text=" Review" />
-                    </TextBlock>
-                </Button>
-            </Border>
+            <Button Classes="fnKey" Command="{Binding CreateReviewCommand}">
+                <TextBlock>
+                    <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F7" /><Run Text=" Review" />
+                </TextBlock>
+            </Button>
             <Button Classes="fnKey" Click="OnExitClick">
                 <TextBlock>
                     <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="Alt+F4" /><Run Text=" Exit" />
@@ -342,7 +339,7 @@
                                  SelectedItem="{Binding SelectedAssessment}"
                                  DoubleTapped="OnAssessmentDoubleTapped">
                             <ListBox.ItemTemplate>
-                                <DataTemplate x:DataType="services:ArtifactFile">
+                                <DataTemplate x:DataType="app:ArtifactFile">
                                     <TextBlock Text="{Binding FileName}" ToolTip.Tip="{Binding FilePath}" />
                                 </DataTemplate>
                             </ListBox.ItemTemplate>

@@ -1,17 +1,18 @@
-using RecallCommander.Markdown.Writing;
-using RecallCommander.Workbench.Services;
-using RecallCommander.Workbench.Tests.Support;
+using RecallCommander.Application.Assessments;
+using RecallCommander.Application.Tests.Fakes;
+using RecallCommander.Contracts.Artifacts;
+using RecallCommander.Domain;
 using Xunit;
 
-namespace RecallCommander.Workbench.Tests.Services;
+namespace RecallCommander.Application.Tests.Assessments;
 
 public sealed class AssessmentLocatorTests
 {
     private readonly FakeFileSystem _fileSystem = new();
 
     private AssessmentLocator CreateLocator() => new(
-        new FixedArtifactOutputPathProvider("/output"),
-        new AssessmentRenderer(),
+        new FixedOutputPath("/output"),
+        new StubAssessmentRenderer(),
         _fileSystem);
 
     [Fact]
@@ -39,5 +40,19 @@ public sealed class AssessmentLocatorTests
     public void A_missing_output_directory_yields_an_empty_list()
     {
         Assert.Empty(CreateLocator().List());
+    }
+
+    private sealed class FixedOutputPath(string directory) : IArtifactOutputPathProvider
+    {
+        public string GetOutputDirectory() => directory;
+    }
+
+    private sealed class StubAssessmentRenderer : IArtifactRenderer<Assessment>
+    {
+        public string Slug => "assessment";
+
+        public string DirectoryName => "Assessments";
+
+        public string Render(Assessment artifact, string artifactId) => string.Empty;
     }
 }

@@ -2,13 +2,13 @@ using RecallCommander.Contracts.Artifacts;
 using RecallCommander.Contracts.FileSystem;
 using RecallCommander.Domain;
 
-namespace RecallCommander.Workbench.Services;
+namespace RecallCommander.Application.Assessments;
 
 /// <summary>
 /// Discovers generated assessment artifacts for display. The Markdown files
 /// are the source of truth — there is no database of assessments — so this
-/// simply lists the artifact output directory, newest first. The Workbench
-/// only ever reads these files; editing happens in external applications.
+/// simply lists the artifact output directory, newest first. Callers only
+/// ever read these files; editing happens in the user's own editor.
 /// </summary>
 public sealed class AssessmentLocator(
     IArtifactOutputPathProvider outputPath,

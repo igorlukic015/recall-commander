@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Configuration;
-using RecallCommander.Cli.Infrastructure;
+using RecallCommander.Infrastructure.Configuration;
 using RecallCommander.IntegrationTests.Support;
 using Xunit;
 

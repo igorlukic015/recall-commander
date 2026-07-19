@@ -1,6 +1,7 @@
 using RecallCommander.Application.Artifacts;
 using RecallCommander.Application.Assessments;
 using RecallCommander.Application.Scanning;
+using RecallCommander.Contracts.Artifacts;
 using RecallCommander.Domain;
 using RecallCommander.Infrastructure.Artifacts;
 using RecallCommander.Infrastructure.FileSystem;

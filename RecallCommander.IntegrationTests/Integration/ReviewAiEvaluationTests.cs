@@ -5,6 +5,7 @@ using RecallCommander.AI.Prompts;
 using RecallCommander.Application.Artifacts;
 using RecallCommander.Application.Attempts;
 using RecallCommander.Application.Reviews;
+using RecallCommander.Contracts.Artifacts;
 using RecallCommander.Domain;
 using RecallCommander.Infrastructure.Artifacts;
 using RecallCommander.Infrastructure.FileSystem;

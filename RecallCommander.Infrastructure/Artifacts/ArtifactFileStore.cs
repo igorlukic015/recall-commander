@@ -1,4 +1,3 @@
-using RecallCommander.Application.Artifacts;
 using RecallCommander.Contracts.Artifacts;
 
 namespace RecallCommander.Infrastructure.Artifacts;

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace RecallCommander.Cli.Infrastructure;
+namespace RecallCommander.Infrastructure.Configuration;
 
 /// <summary>
 /// Loads configuration from a .env file in the working directory: KEY=VALUE

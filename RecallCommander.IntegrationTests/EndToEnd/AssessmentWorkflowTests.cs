@@ -69,6 +69,43 @@ public sealed class AssessmentWorkflowTests : IDisposable
     }
 
     [Fact]
+    public async Task Assessment_list_shows_generated_assessments_newest_first()
+    {
+        _workspace.WriteQuestionFile("csharp.md", SampleQuestions.CSharpFile());
+        await _cli.RunAsync("init");
+        await _cli.RunAsync("source", "add", _workspace.QuestionsDirectory);
+        await _cli.RunAsync("assessment", "create", "--count", "1");
+        await _cli.RunAsync("assessment", "create", "--count", "1");
+
+        CliResult list = await _cli.RunAsync("assessment", "list");
+
+        Assert.Equal(0, list.ExitCode);
+        string[] fileNames = Directory.GetFiles(_workspace.AssessmentsDirectory)
+            .Select(Path.GetFileName)
+            .Order(StringComparer.Ordinal)
+            .Cast<string>()
+            .ToArray();
+        Assert.Equal(2, fileNames.Length);
+
+        // Both artifacts are listed, the newer (higher sequence) one first.
+        Assert.All(fileNames, fileName => Assert.Contains(fileName, list.Output));
+        Assert.True(
+            list.Output.IndexOf(fileNames[1], StringComparison.Ordinal)
+            < list.Output.IndexOf(fileNames[0], StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Assessment_list_without_assessments_prints_a_hint()
+    {
+        await _cli.RunAsync("init");
+
+        CliResult list = await _cli.RunAsync("assessment", "list");
+
+        Assert.Equal(0, list.ExitCode);
+        Assert.Contains("No assessments found", list.Output);
+    }
+
+    [Fact]
     public async Task Default_count_is_used_when_count_is_omitted()
     {
         _workspace.WriteQuestionFile("csharp.md", SampleQuestions.CSharpFile());

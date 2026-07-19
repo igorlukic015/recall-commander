@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace RecallCommander.Application.Artifacts;
+namespace RecallCommander.Contracts.Artifacts;
 
 /// <summary>
 /// Produces filesystem-safe artifact file names of the form

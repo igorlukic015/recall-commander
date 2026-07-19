@@ -175,6 +175,28 @@ public sealed class RecordingAssessmentWriter(FakeFileSystem fileSystem, string 
     }
 }
 
+/// <summary>
+/// Pretends to write a review artifact: records it and drops a Markdown file
+/// into the fake filesystem so the created review can be previewed.
+/// </summary>
+public sealed class RecordingReviewWriter(FakeFileSystem fileSystem, string directory) : IArtifactWriter<Review>
+{
+    private int _sequence;
+
+    public Review? Written { get; private set; }
+
+    public Task<SavedArtifact> WriteAsync(Review artifact, CancellationToken cancellationToken = default)
+    {
+        Written = artifact;
+        _sequence++;
+
+        string path = $"{directory}/review-2026-07-19-{_sequence:000}.md";
+        fileSystem.AddDirectory(directory).AddFile(path, $"# {artifact.Title}\n\ngenerated review body\n");
+
+        return Task.FromResult(new SavedArtifact(path));
+    }
+}
+
 public sealed class FixedTimeProvider(DateTimeOffset now) : TimeProvider
 {
     public override DateTimeOffset GetUtcNow() => now;

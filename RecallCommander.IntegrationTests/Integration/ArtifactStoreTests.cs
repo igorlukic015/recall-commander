@@ -1,4 +1,4 @@
-using RecallCommander.Application.Artifacts;
+using RecallCommander.Contracts.Artifacts;
 using RecallCommander.Infrastructure.Artifacts;
 using RecallCommander.IntegrationTests.Support;
 using RecallCommander.Markdown.Writing;

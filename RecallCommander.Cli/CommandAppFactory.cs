@@ -6,6 +6,7 @@ using RecallCommander.Cli.Commands;
 using RecallCommander.Cli.Infrastructure;
 using RecallCommander.Contracts.Exceptions;
 using RecallCommander.Infrastructure;
+using RecallCommander.Infrastructure.Configuration;
 using RecallCommander.Markdown;
 using Spectre.Console;
 using Spectre.Console.Cli;
@@ -69,6 +70,9 @@ public static class CommandAppFactory
 
                 assessment.AddCommand<AssessmentCreateCommand>("create")
                     .WithDescription("Generate an assessment from discovered questions.");
+
+                assessment.AddCommand<AssessmentListCommand>("list")
+                    .WithDescription("List generated assessments, newest first.");
             });
 
             config.AddBranch("attempt", attempt =>

@@ -1,5 +1,6 @@
 using RecallCommander.Application.Assessments;
 using RecallCommander.Application.Attempts;
+using RecallCommander.Application.Reviews;
 using RecallCommander.Application.Scanning;
 using RecallCommander.Application.Sources;
 using RecallCommander.Contracts.Assessments;
@@ -21,12 +22,14 @@ public sealed class WorkbenchHarness
 {
     public const string OutputDirectory = "/output";
     public const string AssessmentsDirectory = "/output/Assessments";
+    public const string ReviewsDirectory = "/output/Reviews";
 
     private static readonly DateTimeOffset Now = new(2026, 7, 19, 20, 0, 0, TimeSpan.Zero);
 
     public WorkbenchHarness()
     {
         Writer = new RecordingAssessmentWriter(FileSystem, AssessmentsDirectory);
+        ReviewWriter = new RecordingReviewWriter(FileSystem, ReviewsDirectory);
     }
 
     public FakeFileSystem FileSystem { get; } = new();
@@ -38,6 +41,8 @@ public sealed class WorkbenchHarness
     public FakeExternalFileOpener Opener { get; } = new();
 
     public RecordingAssessmentWriter Writer { get; }
+
+    public RecordingReviewWriter ReviewWriter { get; }
 
     /// <summary>What the attempt parser returns; defaults to a valid attempt.</summary>
     public AttemptParseResult AttemptResult { get; set; } = new(
@@ -64,13 +69,15 @@ public sealed class WorkbenchHarness
         IQuestionSourceRepository repo = repository ?? Repository;
         FixedTimeProvider time = new FixedTimeProvider(Now);
         ScanService scanner = new ScanService(repo, FileSystem, new FakeQuestionBlockParser());
+        ValidateAttemptService attempts = new ValidateAttemptService(FileSystem, new FakeAttemptParser(AttemptResult));
 
         return new MainWindowViewModel(
             new FakeWorkspaceInitializer(),
             new QuestionSourceService(repo, FileSystem, time),
             scanner,
             new CreateAssessmentService(scanner, new FirstNSelector(), Writer, time),
-            new ValidateAttemptService(FileSystem, new FakeAttemptParser(AttemptResult)),
+            attempts,
+            new CreateReviewService(attempts, new FakeQuestionEvaluator(), ReviewWriter, time),
             new AssessmentLocator(
                 new FixedArtifactOutputPathProvider(OutputDirectory),
                 new AssessmentRenderer(),
