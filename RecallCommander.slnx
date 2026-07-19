@@ -1,13 +1,16 @@
 <Solution>
   <Project Path="RecallCommander.Cli/RecallCommander.Cli.csproj" />
+  <Project Path="RecallCommander.AI/RecallCommander.AI.csproj" />
   <Project Path="RecallCommander.Application/RecallCommander.Application.csproj" />
   <Project Path="RecallCommander.Contracts/RecallCommander.Contracts.csproj" />
   <Project Path="RecallCommander.Domain/RecallCommander.Domain.csproj" />
   <Project Path="RecallCommander.Infrastructure/RecallCommander.Infrastructure.csproj" />
   <Project Path="RecallCommander.Markdown/RecallCommander.Markdown.csproj" />
   <Project Path="RecallCommander.Workbench/RecallCommander.Workbench.csproj" />
+  <Project Path="RecallCommander.AI.Tests/RecallCommander.AI.Tests.csproj" />
   <Project Path="RecallCommander.Domain.Tests/RecallCommander.Domain.Tests.csproj" />
   <Project Path="RecallCommander.Application.Tests/RecallCommander.Application.Tests.csproj" />
   <Project Path="RecallCommander.Markdown.Tests/RecallCommander.Markdown.Tests.csproj" />
+  <Project Path="RecallCommander.Workbench.Tests/RecallCommander.Workbench.Tests.csproj" />
   <Project Path="RecallCommander.IntegrationTests/RecallCommander.IntegrationTests.csproj" />
 </Solution>

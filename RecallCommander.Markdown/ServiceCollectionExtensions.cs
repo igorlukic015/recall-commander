@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IQuestionBlockParser, QuestionBlockParser>();
         services.AddSingleton<IAttemptParser, AttemptParser>();
         services.AddSingleton<IArtifactRenderer<Assessment>, AssessmentRenderer>();
+        services.AddSingleton<IArtifactRenderer<Review>, ReviewRenderer>();
         return services;
     }
 }

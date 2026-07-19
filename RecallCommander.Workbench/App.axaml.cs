@@ -48,6 +48,8 @@ public partial class App : Avalonia.Application
         services.AddRecallCommanderInfrastructure();
 
         services.AddSingleton<IDialogService>(new StorageProviderDialogService(() => desktop.MainWindow));
+        services.AddSingleton<IExternalFileOpener, ShellFileOpener>();
+        services.AddSingleton<AssessmentLocator>();
         services.AddSingleton<MainWindowViewModel>();
 
         return services.BuildServiceProvider();

@@ -2,19 +2,21 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:RecallCommander.Workbench.ViewModels"
         xmlns:domain="using:RecallCommander.Domain"
+        xmlns:services="using:RecallCommander.Workbench.Services"
         x:Class="RecallCommander.Workbench.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="Recall Commander"
         Icon="/Assets/logo.png"
-        Width="1080" Height="680"
-        MinWidth="800" MinHeight="520"
+        Width="1180" Height="740"
+        MinWidth="900" MinHeight="560"
         Background="{DynamicResource WindowBackgroundBrush}">
 
     <Window.KeyBindings>
         <KeyBinding Gesture="F2" Command="{Binding AddSourceCommand}" />
         <KeyBinding Gesture="F3" Command="{Binding ScanSourcesCommand}" />
         <KeyBinding Gesture="F4" Command="{Binding CreateAssessmentCommand}" />
-        <KeyBinding Gesture="F5" Command="{Binding ValidateAttemptCommand}" />
+        <KeyBinding Gesture="F5" Command="{Binding SelectAttemptCommand}" />
+        <KeyBinding Gesture="F6" Command="{Binding ValidateAttemptCommand}" />
     </Window.KeyBindings>
 
     <Window.Resources>
@@ -82,6 +84,15 @@
             <Setter Property="Padding" Value="10,4" />
         </Style>
 
+        <Style Selector="Button.panelAction">
+            <Setter Property="Background" Value="{DynamicResource ToolbarButtonBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource ToolbarButtonForegroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="8,1" />
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+
         <Style Selector="Button.fnKey">
             <Setter Property="Background" Value="{DynamicResource FnKeyBackgroundBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource FnKeyForegroundBrush}" />
@@ -127,6 +138,7 @@
         <Style Selector="Border.statusBar TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource StatusBarForegroundBrush}" />
             <Setter Property="FontSize" Value="12" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
 
         <Style Selector="ListBox.panelList">
@@ -137,6 +149,16 @@
             <Setter Property="Padding" Value="8,2" />
             <Setter Property="MinHeight" Value="0" />
         </Style>
+
+        <Style Selector="TextBox.readonlyDoc">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="AcceptsReturn" Value="True" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="FontFamily" Value="Consolas,Cascadia Mono,DejaVu Sans Mono,monospace" />
+            <Setter Property="FontSize" Value="12.5" />
+        </Style>
     </Window.Styles>
 
     <DockPanel>
@@ -146,12 +168,23 @@
             <MenuItem Header="_Sources">
                 <MenuItem Header="_Add Source" InputGesture="F2" Command="{Binding AddSourceCommand}" />
                 <MenuItem Header="_Remove Source" IsEnabled="False" />
+                <MenuItem Header="Re_fresh Sources" Command="{Binding RefreshSourcesCommand}" />
                 <Separator />
                 <MenuItem Header="S_can Sources" InputGesture="F3" Command="{Binding ScanSourcesCommand}" />
             </MenuItem>
             <MenuItem Header="_Assessment">
                 <MenuItem Header="_Create Assessment" InputGesture="F4" Command="{Binding CreateAssessmentCommand}" />
-                <MenuItem Header="_Validate Attempt" InputGesture="F5" Command="{Binding ValidateAttemptCommand}" />
+                <MenuItem Header="Re_fresh Assessments" Command="{Binding RefreshAssessmentsCommand}" />
+                <Separator />
+                <MenuItem Header="_Preview" Command="{Binding PreviewAssessmentCommand}" />
+                <MenuItem Header="_Open Externally" Command="{Binding OpenAssessmentExternallyCommand}" />
+            </MenuItem>
+            <MenuItem Header="A_ttempt">
+                <MenuItem Header="_Select Attempt" InputGesture="F5" Command="{Binding SelectAttemptCommand}" />
+                <MenuItem Header="_Validate Attempt" InputGesture="F6" Command="{Binding ValidateAttemptCommand}" />
+            </MenuItem>
+            <MenuItem Header="_Review">
+                <MenuItem Header="Coming soon" IsEnabled="False" />
             </MenuItem>
             <MenuItem Header="Con_figuration">
                 <MenuItem Header="_Light Mode" Click="OnLightModeClick" />
@@ -178,7 +211,7 @@
 
                 <!-- The border carries the tooltip: disabled controls do not
                      always trigger tooltips themselves. -->
-                <Border Background="Transparent" ToolTip.Tip="Not implemented yet.">
+                <Border Background="Transparent" ToolTip.Tip="Removing sources is not supported yet.">
                     <Button Classes="toolbar" Content="Remove Source" IsEnabled="False" />
                 </Border>
 
@@ -193,12 +226,22 @@
                                FormatString="0"
                                Width="110" />
                 <Button Classes="toolbar" Content="Create Assessment" Command="{Binding CreateAssessmentCommand}" />
+
+                <Border Width="1" Background="{DynamicResource PanelBorderBrush}" Margin="4,0" />
+
+                <Button Classes="toolbar" Content="Select Attempt" Command="{Binding SelectAttemptCommand}" />
                 <Button Classes="toolbar" Content="Validate Attempt" Command="{Binding ValidateAttemptCommand}" />
+
+                <Border Width="1" Background="{DynamicResource PanelBorderBrush}" Margin="4,0" />
+
+                <Border Background="Transparent" ToolTip.Tip="Coming soon.">
+                    <Button Classes="toolbar" Content="Review" IsEnabled="False" />
+                </Border>
             </StackPanel>
         </Border>
 
         <!-- Function key bar -->
-        <UniformGrid DockPanel.Dock="Bottom" Columns="6" Background="{DynamicResource FnKeyBarBackgroundBrush}">
+        <UniformGrid DockPanel.Dock="Bottom" Columns="7" Background="{DynamicResource FnKeyBarBackgroundBrush}">
             <Button Classes="fnKey" Command="{Binding AddSourceCommand}">
                 <TextBlock>
                     <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F2" /><Run Text=" Add Source" />
@@ -214,16 +257,23 @@
                     <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F4" /><Run Text=" Create" />
                 </TextBlock>
             </Button>
+            <Button Classes="fnKey" Command="{Binding SelectAttemptCommand}">
+                <TextBlock>
+                    <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F5" /><Run Text=" Attempt" />
+                </TextBlock>
+            </Button>
             <Button Classes="fnKey" Command="{Binding ValidateAttemptCommand}">
                 <TextBlock>
-                    <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F5" /><Run Text=" Validate" />
+                    <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F6" /><Run Text=" Validate" />
                 </TextBlock>
             </Button>
-            <Button Classes="fnKey" IsEnabled="False">
-                <TextBlock>
-                    <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F8" /><Run Text=" Remove" />
-                </TextBlock>
-            </Button>
+            <Border Background="Transparent" ToolTip.Tip="Coming soon.">
+                <Button Classes="fnKey" IsEnabled="False" HorizontalAlignment="Stretch">
+                    <TextBlock>
+                        <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="F7" /><Run Text=" Review" />
+                    </TextBlock>
+                </Button>
+            </Border>
             <Button Classes="fnKey" Click="OnExitClick">
                 <TextBlock>
                     <Run Foreground="{DynamicResource FnLabelForegroundBrush}" FontWeight="Bold" Text="Alt+F4" /><Run Text=" Exit" />
@@ -231,55 +281,107 @@
             </Button>
         </UniformGrid>
 
+        <!-- Knowledge status bar -->
+        <Border DockPanel.Dock="Bottom" Classes="statusBar">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Right" Text="{Binding SelectedAttemptText}" />
+                <TextBlock Text="{Binding KnowledgeStatusText}" />
+            </DockPanel>
+        </Border>
+
         <!-- Dual panels -->
         <Grid ColumnDefinitions="*,4,*" Margin="4">
 
-            <!-- Left panel: question sources -->
-            <Border Grid.Column="0" Classes="panel">
-                <DockPanel>
-                    <Border DockPanel.Dock="Top" Classes="panelHeader">
-                        <TextBlock Text="Question Sources" />
-                    </Border>
-                    <Border DockPanel.Dock="Top" Classes="columnHeader">
-                        <TextBlock Text="Path" />
-                    </Border>
-                    <Border DockPanel.Dock="Bottom" Classes="statusBar">
-                        <TextBlock Text="{Binding Sources.Count, StringFormat='{}{0} source(s) registered'}" />
-                    </Border>
-                    <ListBox Classes="panelList"
-                             ItemsSource="{Binding Sources}"
-                             SelectedItem="{Binding SelectedSource}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="domain:QuestionSource">
-                                <TextBlock Text="{Binding DirectoryPath}" />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </DockPanel>
-            </Border>
+            <!-- Left column: question sources over assessments -->
+            <Grid Grid.Column="0" RowDefinitions="*,4,*">
+
+                <Border Grid.Row="0" Classes="panel">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" Classes="panelHeader">
+                            <TextBlock Text="Question Sources" />
+                        </Border>
+                        <Border DockPanel.Dock="Top" Classes="columnHeader">
+                            <TextBlock Text="Path" />
+                        </Border>
+                        <Border DockPanel.Dock="Bottom" Classes="statusBar">
+                            <TextBlock Text="{Binding Sources.Count, StringFormat='{}{0} source(s) registered'}" />
+                        </Border>
+                        <ListBox Classes="panelList"
+                                 ItemsSource="{Binding Sources}"
+                                 SelectedItem="{Binding SelectedSource}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="domain:QuestionSource">
+                                    <TextBlock Text="{Binding DirectoryPath}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </Border>
+
+                <GridSplitter Grid.Row="1" Background="{DynamicResource WindowBackgroundBrush}" ResizeDirection="Rows" />
+
+                <Border Grid.Row="2" Classes="panel">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" Classes="panelHeader">
+                            <TextBlock Text="Assessments" />
+                        </Border>
+                        <Border DockPanel.Dock="Top" Classes="columnHeader">
+                            <TextBlock Text="File (newest first) — created by Recall Commander, edited nowhere" />
+                        </Border>
+                        <Border DockPanel.Dock="Bottom" Classes="statusBar">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
+                                    <Button Classes="panelAction" Content="Preview" Command="{Binding PreviewAssessmentCommand}" />
+                                    <Button Classes="panelAction" Content="Open Externally" Command="{Binding OpenAssessmentExternallyCommand}" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding Assessments.Count, StringFormat='{}{0} assessment(s)'}" />
+                            </DockPanel>
+                        </Border>
+                        <ListBox Classes="panelList"
+                                 ItemsSource="{Binding Assessments}"
+                                 SelectedItem="{Binding SelectedAssessment}"
+                                 DoubleTapped="OnAssessmentDoubleTapped">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="services:ArtifactFile">
+                                    <TextBlock Text="{Binding FileName}" ToolTip.Tip="{Binding FilePath}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </Border>
+
+            </Grid>
 
             <GridSplitter Grid.Column="1" Background="{DynamicResource WindowBackgroundBrush}" ResizeDirection="Columns" />
 
-            <!-- Right panel: output log -->
-            <Border Grid.Column="2" Classes="panel">
-                <DockPanel>
-                    <Border DockPanel.Dock="Top" Classes="panelHeader">
-                        <TextBlock Text="Output" />
-                    </Border>
-                    <Border DockPanel.Dock="Bottom" Classes="statusBar">
-                        <TextBlock Text="{Binding DiscoveredQuestionsText}" />
-                    </Border>
-                    <TextBox Text="{Binding OutputText, Mode=OneWay}"
-                             IsReadOnly="True"
-                             AcceptsReturn="True"
-                             TextWrapping="Wrap"
-                             Background="Transparent"
-                             BorderThickness="0"
-                             FontFamily="Consolas,Cascadia Mono,DejaVu Sans Mono,monospace"
-                             FontSize="12.5"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto" />
-                </DockPanel>
-            </Border>
+            <!-- Right column: read-only preview over output log -->
+            <Grid Grid.Column="2" RowDefinitions="*,4,*">
+
+                <Border Grid.Row="0" Classes="panel">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" Classes="panelHeader">
+                            <TextBlock Text="{Binding PreviewTitle}" />
+                        </Border>
+                        <TextBox Classes="readonlyDoc"
+                                 Text="{Binding PreviewText, Mode=OneWay}"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                    </DockPanel>
+                </Border>
+
+                <GridSplitter Grid.Row="1" Background="{DynamicResource WindowBackgroundBrush}" ResizeDirection="Rows" />
+
+                <Border Grid.Row="2" Classes="panel">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Top" Classes="panelHeader">
+                            <TextBlock Text="Output" />
+                        </Border>
+                        <TextBox Classes="readonlyDoc"
+                                 Text="{Binding OutputText, Mode=OneWay}"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                    </DockPanel>
+                </Border>
+
+            </Grid>
 
         </Grid>
 

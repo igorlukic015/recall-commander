@@ -6,19 +6,16 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
-        <PackageReference Include="Spectre.Console.Testing" />
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../RecallCommander.AI/RecallCommander.AI.csproj" />
         <ProjectReference Include="../RecallCommander.Application/RecallCommander.Application.csproj" />
-        <ProjectReference Include="../RecallCommander.Cli/RecallCommander.Cli.csproj" />
         <ProjectReference Include="../RecallCommander.Contracts/RecallCommander.Contracts.csproj" />
         <ProjectReference Include="../RecallCommander.Domain/RecallCommander.Domain.csproj" />
-        <ProjectReference Include="../RecallCommander.Infrastructure/RecallCommander.Infrastructure.csproj" />
         <ProjectReference Include="../RecallCommander.Markdown/RecallCommander.Markdown.csproj" />
+        <ProjectReference Include="../RecallCommander.Workbench/RecallCommander.Workbench.csproj" />
     </ItemGroup>
 
 </Project>

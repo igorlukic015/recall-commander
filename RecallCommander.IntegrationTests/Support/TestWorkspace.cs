@@ -35,6 +35,8 @@ public sealed class TestWorkspace : IDisposable
 
     public string AssessmentsDirectory => Path.Combine(Root, "Assessments");
 
+    public string ReviewsDirectory => Path.Combine(Root, "Reviews");
+
     /// <summary>Writes a Markdown file below Questions/, creating subdirectories as needed.</summary>
     public string WriteQuestionFile(string relativePath, string content)
     {

@@ -6,6 +6,8 @@ using RecallCommander.Application.Assessments;
 using RecallCommander.Application.Attempts;
 using RecallCommander.Application.Scanning;
 using RecallCommander.Application.Sources;
+using RecallCommander.Contracts.Exceptions;
+using RecallCommander.Contracts.FileSystem;
 using RecallCommander.Contracts.Parsing;
 using RecallCommander.Contracts.Workspace;
 using RecallCommander.Domain;
@@ -16,7 +18,9 @@ namespace RecallCommander.Workbench.ViewModels;
 /// <summary>
 /// Drives the main window. All operations delegate to the same application
 /// services the CLI commands use; this class only shapes their results into
-/// bindable state and output messages.
+/// bindable state and output messages. Markdown artifacts are displayed
+/// read-only and opened externally for editing — the Workbench never writes
+/// to them.
 /// </summary>
 public partial class MainWindowViewModel(
     IWorkspaceInitializer workspaceInitializer,
@@ -24,27 +28,53 @@ public partial class MainWindowViewModel(
     ScanService scanner,
     CreateAssessmentService assessments,
     ValidateAttemptService attempts,
+    AssessmentLocator assessmentLocator,
+    IFileSystem fileSystem,
+    IExternalFileOpener externalOpener,
     IDialogService dialogs) : ViewModelBase
 {
+    private const string PreviewPlaceholder =
+        "Select an assessment (or an attempt via Select Attempt) and press Preview.\n\n"
+        + "Artifacts are shown read-only. To edit, open them in your own editor.";
+
     private readonly StringBuilder _output = new();
 
     public ObservableCollection<QuestionSource> Sources { get; } = [];
+
+    public ObservableCollection<ArtifactFile> Assessments { get; } = [];
 
     [ObservableProperty]
     public partial QuestionSource? SelectedSource { get; set; }
 
     [ObservableProperty]
-    public partial string DiscoveredQuestionsText { get; private set; } = "Discovered questions: not scanned yet";
+    public partial ArtifactFile? SelectedAssessment { get; set; }
+
+    [ObservableProperty]
+    public partial string KnowledgeStatusText { get; private set; } =
+        "Sources: – | Files: – | Questions: – | Warnings: – (not scanned yet)";
 
     [ObservableProperty]
     public partial decimal? QuestionCount { get; set; } = CreateAssessmentService.DefaultQuestionCount;
+
+    [ObservableProperty]
+    public partial string PreviewTitle { get; private set; } = "Preview";
+
+    [ObservableProperty]
+    public partial string PreviewText { get; private set; } = PreviewPlaceholder;
+
+    [ObservableProperty]
+    public partial string? SelectedAttemptPath { get; private set; }
+
+    [ObservableProperty]
+    public partial string SelectedAttemptText { get; private set; } = "No attempt selected";
 
     [ObservableProperty]
     public partial string OutputText { get; private set; } = string.Empty;
 
     /// <summary>
     /// Prepares the workspace (same as "rc init"; idempotent) and loads the
-    /// registered sources. Called once when the main window opens.
+    /// registered sources and existing assessments. Called once when the main
+    /// window opens.
     /// </summary>
     public async Task InitializeAsync()
     {
@@ -57,10 +87,11 @@ public partial class MainWindowViewModel(
             AppendOutput($"Database: {result.DatabasePath}");
 
             await ReloadSourcesAsync();
+            ReloadAssessments();
         }
         catch (Exception exception)
         {
-            AppendOutput($"Startup failed: {exception.Message}");
+            ReportFailure("Could not start the Workbench.", exception);
         }
     }
 
@@ -91,7 +122,21 @@ public partial class MainWindowViewModel(
         }
         catch (Exception exception)
         {
-            AppendOutput($"Add source failed: {exception.Message}");
+            ReportFailure("Could not add the source.", exception);
+        }
+    }
+
+    [RelayCommand]
+    private async Task RefreshSourcesAsync()
+    {
+        try
+        {
+            await ReloadSourcesAsync();
+            AppendOutput($"Sources refreshed: {Sources.Count} registered.");
+        }
+        catch (Exception exception)
+        {
+            ReportFailure("Could not refresh the sources.", exception);
         }
     }
 
@@ -115,7 +160,10 @@ public partial class MainWindowViewModel(
                 AppendOutput($"Warning: {warning.Location} — {warning.Message}");
             }
 
-            DiscoveredQuestionsText = $"Discovered questions: {report.TotalQuestions}";
+            KnowledgeStatusText =
+                $"Sources: {report.SourceCount} | Files: {report.Files.Count} | "
+                + $"Questions: {report.TotalQuestions} | Warnings: {report.Warnings.Count}";
+
             AppendOutput(
                 $"""
                  Scan completed.
@@ -128,7 +176,7 @@ public partial class MainWindowViewModel(
         }
         catch (Exception exception)
         {
-            AppendOutput($"Scan failed: {exception.Message}");
+            ReportFailure("Could not scan.", exception);
         }
     }
 
@@ -147,7 +195,13 @@ public partial class MainWindowViewModel(
 
             if (result.Status == CreateAssessmentStatus.NoQuestionsFound)
             {
-                AppendOutput("No questions found. Check your sources with a scan.");
+                AppendOutput(
+                    """
+                    Could not create assessment.
+
+                    Reason:
+                    No questions found. Scan your sources to check.
+                    """);
                 return;
             }
 
@@ -162,15 +216,64 @@ public partial class MainWindowViewModel(
                  Questions:
                  {result.QuestionCount}
                  """);
+
+            ReloadAssessments();
         }
         catch (Exception exception)
         {
-            AppendOutput($"Create assessment failed: {exception.Message}");
+            ReportFailure("Could not create assessment.", exception);
         }
     }
 
     [RelayCommand]
-    private async Task ValidateAttemptAsync()
+    private void RefreshAssessments()
+    {
+        try
+        {
+            ReloadAssessments();
+            AppendOutput($"Assessments refreshed: {Assessments.Count} found.");
+        }
+        catch (Exception exception)
+        {
+            ReportFailure("Could not refresh the assessments.", exception);
+        }
+    }
+
+    [RelayCommand]
+    private void PreviewAssessment()
+    {
+        if (SelectedAssessment is not { } assessment)
+        {
+            AppendOutput("Select an assessment to preview.");
+            return;
+        }
+
+        Preview(assessment.FileName, assessment.FilePath);
+    }
+
+    [RelayCommand]
+    private void OpenAssessmentExternally()
+    {
+        if (SelectedAssessment is not { } assessment)
+        {
+            AppendOutput("Select an assessment to open.");
+            return;
+        }
+
+        try
+        {
+            externalOpener.Open(assessment.FilePath);
+            AppendOutput($"Opened externally: {assessment.FileName}");
+            AppendOutput("Use Save As in your editor to turn it into an attempt.");
+        }
+        catch (Exception exception)
+        {
+            ReportFailure("Could not open the assessment externally.", exception);
+        }
+    }
+
+    [RelayCommand]
+    private async Task SelectAttemptAsync()
     {
         try
         {
@@ -180,6 +283,31 @@ public partial class MainWindowViewModel(
                 ["*.md"]);
 
             if (path is null)
+            {
+                return;
+            }
+
+            SelectedAttemptPath = path;
+            SelectedAttemptText = $"Attempt: {Path.GetFileName(path)}";
+            Preview(Path.GetFileName(path), path);
+        }
+        catch (Exception exception)
+        {
+            ReportFailure("Could not select the attempt.", exception);
+        }
+    }
+
+    [RelayCommand]
+    private async Task ValidateAttemptAsync()
+    {
+        try
+        {
+            if (SelectedAttemptPath is null)
+            {
+                await SelectAttemptAsync();
+            }
+
+            if (SelectedAttemptPath is not { } path)
             {
                 return;
             }
@@ -212,7 +340,21 @@ public partial class MainWindowViewModel(
         }
         catch (Exception exception)
         {
-            AppendOutput($"Validate attempt failed: {exception.Message}");
+            ReportFailure("Could not validate the attempt.", exception);
+        }
+    }
+
+    /// <summary>Loads an artifact into the read-only preview. Never writes anything back.</summary>
+    private void Preview(string fileName, string filePath)
+    {
+        try
+        {
+            PreviewText = fileSystem.ReadAllText(filePath);
+            PreviewTitle = $"Preview — {fileName} (read-only)";
+        }
+        catch (Exception exception)
+        {
+            ReportFailure("Could not preview the file.", exception);
         }
     }
 
@@ -225,6 +367,37 @@ public partial class MainWindowViewModel(
         {
             Sources.Add(source);
         }
+    }
+
+    private void ReloadAssessments()
+    {
+        ArtifactFile? previouslySelected = SelectedAssessment;
+
+        Assessments.Clear();
+        foreach (ArtifactFile assessment in assessmentLocator.List())
+        {
+            Assessments.Add(assessment);
+        }
+
+        SelectedAssessment = previouslySelected is null
+            ? null
+            : Assessments.FirstOrDefault(file => file.FilePath == previouslySelected.FilePath);
+    }
+
+    /// <summary>Turns an exception into a readable output block; no stack traces.</summary>
+    private void ReportFailure(string headline, Exception exception)
+    {
+        string reason = exception is WorkspaceNotInitializedException
+            ? "Initialize Recall Commander first."
+            : exception.Message;
+
+        AppendOutput(
+            $"""
+             {headline}
+
+             Reason:
+             {reason}
+             """);
     }
 
     private void AppendOutput(string message)

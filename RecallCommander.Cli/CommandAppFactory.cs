@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using RecallCommander.AI;
 using RecallCommander.Application;
 using RecallCommander.Cli.Commands;
 using RecallCommander.Cli.Infrastructure;
@@ -13,19 +15,22 @@ namespace RecallCommander.Cli;
 /// <summary>
 /// Composition root for the rc command line application. Tests use
 /// <paramref name="configureServices"/> to override boundary services (data
-/// paths, artifact output location) and <paramref name="console"/> to capture
-/// output — the command pipeline itself stays exactly what production runs.
+/// paths, artifact output location), <paramref name="console"/> to capture
+/// output and <paramref name="configuration"/> to pin configuration — the
+/// command pipeline itself stays exactly what production runs.
 /// </summary>
 public static class CommandAppFactory
 {
     public static CommandApp Create(
         Action<IServiceCollection>? configureServices = null,
-        IAnsiConsole? console = null)
+        IAnsiConsole? console = null,
+        IConfiguration? configuration = null)
     {
         ServiceCollection services = new ServiceCollection();
         services.AddRecallCommanderApplication();
         services.AddRecallCommanderMarkdown();
         services.AddRecallCommanderInfrastructure();
+        services.AddRecallCommanderAi(configuration ?? BuildConfiguration());
         configureServices?.Invoke(services);
 
         CommandApp app = new CommandApp(new TypeRegistrar(services));
@@ -74,17 +79,32 @@ public static class CommandAppFactory
                     .WithDescription("Parse a completed assessment file and report problems.");
             });
 
+            config.AddBranch("review", review =>
+            {
+                review.SetDescription("Work with attempt reviews.");
+
+                review.AddCommand<ReviewCreateCommand>("create")
+                    .WithDescription("Evaluate a completed attempt and write a review artifact.");
+            });
+
             config.SetExceptionHandler((exception, resolver) =>
             {
                 IAnsiConsole console = resolver?.Resolve(typeof(IAnsiConsole)) as IAnsiConsole ?? AnsiConsole.Console;
 
-                if (exception is WorkspaceNotInitializedException or CommandRuntimeException)
+                // Spectre wraps failures during command resolution (e.g. a
+                // misconfigured AI provider) in "Could not resolve type";
+                // the wrapped exception carries the useful message.
+                Exception cause = exception is CommandRuntimeException { InnerException: { } inner }
+                    ? inner
+                    : exception;
+
+                if (cause is WorkspaceNotInitializedException or CommandRuntimeException or AiException)
                 {
-                    console.MarkupLineInterpolated($"[red]{exception.Message}[/]");
+                    console.MarkupLineInterpolated($"[red]{cause.Message}[/]");
                 }
                 else
                 {
-                    console.WriteException(exception, ExceptionFormats.ShortenEverything);
+                    console.WriteException(cause, ExceptionFormats.ShortenEverything);
                 }
 
                 return 1;
@@ -93,4 +113,18 @@ public static class CommandAppFactory
 
         return app;
     }
+
+    /// <summary>
+    /// Configuration sources, later ones winning: appsettings.json next to
+    /// the binary, user secrets (id "recall-commander"), then a gitignored
+    /// .env file in the working directory (e.g. Ai__Provider=ollama,
+    /// Ai__Gemini__ApiKey=...). Secrets never live in committed files.
+    /// </summary>
+    private static IConfiguration BuildConfiguration() =>
+        new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddUserSecrets(typeof(CommandAppFactory).Assembly, optional: true)
+            .AddDotEnvFile(Path.Combine(Environment.CurrentDirectory, ".env"))
+            .Build();
 }

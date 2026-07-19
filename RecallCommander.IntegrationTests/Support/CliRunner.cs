@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RecallCommander.Cli;
 using RecallCommander.Contracts.Artifacts;
@@ -12,9 +13,11 @@ namespace RecallCommander.IntegrationTests.Support;
 /// Runs rc commands through the production composition root
 /// (<see cref="CommandAppFactory"/>), overriding only the boundaries:
 /// console output is captured, and the database plus generated artifacts
-/// live inside the test workspace.
+/// live inside the test workspace. Configuration defaults to empty, so the
+/// suite always runs with the fake evaluator regardless of AI settings on
+/// the developer machine.
 /// </summary>
-public sealed class CliRunner(TestWorkspace workspace)
+public sealed class CliRunner(TestWorkspace workspace, IConfiguration? configuration = null)
 {
     public async Task<CliResult> RunAsync(params string[] args)
     {
@@ -28,7 +31,8 @@ public sealed class CliRunner(TestWorkspace workspace)
                 services.AddSingleton<IArtifactOutputPathProvider>(
                     new FixedArtifactOutputPathProvider(workspace.Root));
             },
-            console);
+            console,
+            configuration ?? new ConfigurationBuilder().Build());
 
         int exitCode = await app.RunAsync(args);
         return new CliResult(exitCode, console.Output);
