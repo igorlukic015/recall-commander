@@ -76,12 +76,12 @@ The scan continues even if individual questions are malformed.
 
 ## Question Block Syntax
 
-A Question Block uses nested Markdown blocks.
+A Question Block uses named `:::` fenced containers that nest.
 
-Basic structure:
+Complete structure:
 
 ```
-:::
+:::rc-question
 
 type: Recall
 
@@ -89,13 +89,13 @@ concepts:
 - Concept A
 - Concept B
 
-:::
+:::rc-prompt
 
 The question text goes here.
 
 :::
 
-:::
+:::rc-answer
 
 The optional reference answer goes here.
 
@@ -104,6 +104,11 @@ The optional reference answer goes here.
 :::
 ```
 
+An opening fence carries a name (`:::rc-question`, `:::rc-prompt`,
+`:::rc-answer`); a bare `:::` closes the innermost open block. In the
+example above the first bare `:::` closes `rc-prompt`, the second closes
+`rc-answer`, and the final one closes `rc-question`.
+
 ### Block Structure
 
 A Question Block contains:
@@ -111,23 +116,23 @@ A Question Block contains:
 ```
 rc-question
 |
-├── Metadata
+├── Metadata          (YAML, directly inside rc-question, before nested blocks)
 |
-├── rc-prompt
+├── rc-prompt         (required)
 |
-└── rc-answer (optional)
+└── rc-answer         (optional)
 ```
 
 ### Metadata
 
-Metadata uses YAML-style syntax.
+Metadata uses YAML syntax.
 
-Metadata must appear directly inside the rc-question block before nested content blocks.
+Metadata must appear directly inside the rc-question block before the nested content blocks.
 
 Example:
 
 ```
-:::
+:::rc-question
 
 type: Explanation
 
@@ -135,7 +140,7 @@ concepts:
 - Garbage Collection
 - Memory Management
 
-:::
+:::rc-prompt
 
 Explain garbage collection.
 
@@ -146,7 +151,8 @@ Explain garbage collection.
 
 ### Question Type
 
-The `type` field defines the category of the question.
+The `type` field defines the category of the question. It is matched
+case-insensitively.
 
 MVP 1 supported values:
 
@@ -169,11 +175,11 @@ Expected answer:
 Example:
 
 ```
-:::
+:::rc-question
 
 type: Recall
 
-:::
+:::rc-prompt
 
 What is boxing in C#?
 
@@ -197,11 +203,11 @@ Expected answer:
 Example:
 
 ```
-:::
+:::rc-question
 
 type: Explanation
 
-:::
+:::rc-prompt
 
 Explain how garbage collection works in .NET.
 
@@ -225,7 +231,7 @@ Expected answer:
 Example:
 
 ```
-:::
+:::rc-question
 
 type: Synthesis
 
@@ -234,7 +240,7 @@ concepts:
 - Memory Allocation
 - Performance Optimization
 
-:::
+:::rc-prompt
 
 How do memory allocation strategies affect application performance in managed languages?
 
@@ -274,6 +280,8 @@ A question may have:
 - one concept
 - many concepts
 
+Blank entries are dropped, values are trimmed, and duplicates are removed.
+
 Synthesis questions commonly contain multiple concepts.
 
 ### Prompt Block
@@ -283,7 +291,7 @@ The rc-prompt block contains the actual question.
 Example:
 
 ```
-:::
+:::rc-prompt
 
 Explain the difference between value types and reference types in C#.
 
@@ -292,7 +300,7 @@ Explain the difference between value types and reference types in C#.
 
 The prompt:
 
-- must exist
+- must exist and must not be empty
 - contains Markdown
 - can contain multiple paragraphs
 - can contain lists
@@ -305,7 +313,7 @@ The rc-answer block contains an optional reference answer.
 Example:
 
 ```
-:::
+:::rc-answer
 
 Boxing is the conversion of a value type into an object reference type.
 
@@ -316,7 +324,7 @@ The value is copied into an object allocated on the managed heap.
 
 The answer:
 
-- is optional
+- is optional (an empty rc-answer block is treated as absent)
 - contains Markdown
 - may contain multiple paragraphs
 - may contain code examples
@@ -335,7 +343,7 @@ Some questions have many valid answers.
 Example:
 
 ```
-:::
+:::rc-question
 
 type: Synthesis
 
@@ -344,7 +352,7 @@ concepts:
 - Engineering
 - Economics
 
-:::
+:::rc-prompt
 
 How do technological limitations influence economic development?
 
@@ -355,18 +363,22 @@ How do technological limitations influence economic development?
 
 The purpose is evaluating reasoning, not matching a predefined answer.
 
-#### Future LLM Evaluation
+#### LLM Evaluation
 
-Future versions may evaluate answers using:
+The AI evaluators currently judge the answer against the question alone
+(see [AIArchitecture.md](AIArchitecture.md)). Future versions may also use:
 
 - concepts
 - reference answers
 - previous reviews
-- external evaluation models
 
 A reference answer is helpful but not mandatory.
 
 ## Parsing Rules
+
+Parsing is implemented as a custom Markdig block parser
+(`RcContainerParser`) plus `QuestionBlockParser` in the
+`RecallCommander.Markdown` project.
 
 ### Everything Outside Blocks Is Ignored
 
@@ -377,11 +389,11 @@ Example:
 
 Garbage collection is important.
 
-:::
+:::rc-question
 
 type: Recall
 
-:::
+:::rc-prompt
 
 What is garbage collection?
 
@@ -396,37 +408,20 @@ Only the Question Block is parsed.
 
 ### Multiple Question Blocks Per File
 
-A Markdown file may contain any number of Question Blocks.
+A Markdown file may contain any number of Question Blocks, interleaved with
+normal Markdown.
 
-Example:
+### Fence Nesting
 
-```
-:::
+- An opening fence is `:::` followed by a name (e.g. `:::rc-question`).
+- A bare `:::` always closes the **innermost** open block.
+- Metadata is everything directly inside `rc-question` before the first
+  nested block.
 
-type: Recall
+### Unknown Nested Blocks
 
-:::
-
-Question one.
-
-:::
-
-:::
-
-Some normal Markdown text.
-
-:::
-
-type: Explanation
-
-:::
-
-Question two.
-
-:::
-
-:::
-```
+Unknown `:::rc-*` containers nested inside an rc-question are ignored, so
+future block types do not invalidate existing questions.
 
 ### Block Order
 
@@ -438,17 +433,28 @@ The order in which questions are discovered may only be used for display purpose
 
 ## Error Handling
 
-Parser errors should not stop scanning.
+Parser errors never stop scanning.
 
-Invalid questions are skipped.
+Invalid questions are skipped, and every problem is reported as a warning with:
 
-Recall Commander reports:
-
-- file name
-- line number
+- file name (relative to its source directory)
+- 1-based line number
 - error description
 
-Example:
+Diagnostics produced by the current parser:
+
+| Situation | Message |
+|---|---|
+| No `rc-prompt` inside an rc-question | `Missing rc-prompt block.` |
+| Empty `rc-prompt` | `rc-prompt block is empty.` |
+| Missing `type` metadata | `Missing required field 'type'.` |
+| Unrecognized `type` value | `Unknown question type '...'. Supported types: Recall, Explanation, Synthesis.` |
+| Metadata that is not valid YAML | `Invalid metadata: ...` |
+| Two `rc-prompt` or two `rc-answer` blocks | `Duplicate rc-prompt block.` / `Duplicate rc-answer block.` |
+| `rc-question` inside an `rc-question` | `Nested rc-question block. A previous block may be missing its closing ':::'.` |
+| `rc-prompt`/`rc-answer` outside any `rc-question` | `':::rc-prompt' block found outside an rc-question block.` |
+
+Example scan output:
 
 ```
 Scan completed.
@@ -456,12 +462,10 @@ Scan completed.
 Warnings:
 
 CSharp/boxing.md:42
-Question skipped:
-Missing required field 'type'
+Missing required field 'type'.
 
 CSharp/generics.md:120
-Question skipped:
-Missing rc-prompt block
+Missing rc-prompt block.
 ```
 
 The user may fix the source and scan again.
@@ -472,18 +476,14 @@ A valid Question Block requires:
 
 ### Type
 
-Example:
-
 ```yaml
 type: Recall
 ```
 
 ### Prompt
 
-Example:
-
 ```
-:::
+:::rc-prompt
 
 Question text.
 
@@ -494,8 +494,6 @@ Question text.
 
 ### Concepts
 
-Example:
-
 ```yaml
 concepts:
 - Concept A
@@ -504,10 +502,8 @@ concepts:
 
 ### Reference Answer
 
-Example:
-
 ```
-:::
+:::rc-answer
 
 Reference answer.
 
@@ -545,7 +541,8 @@ Future additions may include:
 - evaluation criteria
 - custom metadata
 
-New metadata should not change the meaning of existing Question Blocks.
+New metadata should not change the meaning of existing Question Blocks
+(unknown metadata fields are already ignored by the parser).
 
 The fundamental structure remains:
 

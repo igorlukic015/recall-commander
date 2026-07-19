@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="Markdig" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+        <PackageReference Include="YamlDotNet" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../RecallCommander.Contracts/RecallCommander.Contracts.csproj" />
+        <ProjectReference Include="../RecallCommander.Domain/RecallCommander.Domain.csproj" />
+    </ItemGroup>
+
+</Project>

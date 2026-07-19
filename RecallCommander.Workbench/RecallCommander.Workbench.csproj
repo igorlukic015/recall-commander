@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <!-- Same secrets store as the CLI, so an AI provider configured once works in both. -->
+        <UserSecretsId>recall-commander</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AvaloniaResource Include="../Assets/logo.png" Link="Assets/logo.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" />
+        <PackageReference Include="Avalonia.Desktop" />
+        <PackageReference Include="Avalonia.Themes.Fluent" />
+        <PackageReference Include="Avalonia.Fonts.Inter" />
+        <PackageReference Include="CommunityToolkit.Mvvm" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Json" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../RecallCommander.AI/RecallCommander.AI.csproj" />
+        <ProjectReference Include="../RecallCommander.Application/RecallCommander.Application.csproj" />
+        <ProjectReference Include="../RecallCommander.Contracts/RecallCommander.Contracts.csproj" />
+        <ProjectReference Include="../RecallCommander.Infrastructure/RecallCommander.Infrastructure.csproj" />
+        <ProjectReference Include="../RecallCommander.Markdown/RecallCommander.Markdown.csproj" />
+    </ItemGroup>
+
+</Project>
