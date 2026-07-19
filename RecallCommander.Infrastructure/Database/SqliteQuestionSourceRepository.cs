@@ -55,6 +55,18 @@ public sealed class SqliteQuestionSourceRepository(ISqliteConnectionFactory conn
             cancellationToken: cancellationToken));
     }
 
+    public async Task<bool> RemoveAsync(string directoryPath, CancellationToken cancellationToken = default)
+    {
+        await using SqliteConnection connection = connectionFactory.CreateOpenConnection();
+
+        int removed = await connection.ExecuteAsync(new CommandDefinition(
+            "DELETE FROM question_sources WHERE directory_path = @DirectoryPath",
+            new { DirectoryPath = directoryPath },
+            cancellationToken: cancellationToken));
+
+        return removed > 0;
+    }
+
     private static string Format(DateTimeOffset timestamp) =>
         timestamp.UtcDateTime.ToString("O", CultureInfo.InvariantCulture);
 

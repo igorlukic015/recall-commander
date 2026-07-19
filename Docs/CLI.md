@@ -66,12 +66,22 @@ Outcomes:
 - `Question source is already registered: <path>` — no-op (exit code 0)
 - `Directory not found: <path>` — rejected (exit code 1)
 
+### rc source remove \<path\>
+
+Unregisters a question source. Only the registration is removed — the
+directory and its contents are never touched. The directory does not need
+to exist anymore; removing a stale registration is the main use case.
+
+Outcomes:
+
+- `Removed question source: <path>` — removed (exit code 0)
+- `Question source is not registered: <path>` — nothing matched, with a
+  hint to check `rc source list` (exit code 1)
+
 ### rc source list
 
 Lists registered sources as a table with Id, Path and Registered (UTC)
 columns. With no sources, prints a hint to use `rc source add <path>`.
-
-There is no `rc source remove` yet.
 
 ### rc scan
 
@@ -250,5 +260,4 @@ The command pipeline under test is exactly what production runs.
 
 Not implemented yet, mentioned in MVP planning:
 
-- `rc source remove`
 - `rc stats`

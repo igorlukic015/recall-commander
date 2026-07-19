@@ -22,4 +22,7 @@ public sealed class InMemoryQuestionSourceRepository : IQuestionSourceRepository
 
     public Task<bool> ExistsAsync(string directoryPath, CancellationToken cancellationToken = default) =>
         Task.FromResult(_sources.Any(source => source.DirectoryPath == directoryPath));
+
+    public Task<bool> RemoveAsync(string directoryPath, CancellationToken cancellationToken = default) =>
+        Task.FromResult(_sources.RemoveAll(source => source.DirectoryPath == directoryPath) > 0);
 }

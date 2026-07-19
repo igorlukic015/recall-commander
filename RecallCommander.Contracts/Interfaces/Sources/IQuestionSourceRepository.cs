@@ -13,4 +13,10 @@ public interface IQuestionSourceRepository
     Task<IReadOnlyList<QuestionSource>> GetAllAsync(CancellationToken cancellationToken = default);
 
     Task<bool> ExistsAsync(string directoryPath, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes the source registered under <paramref name="directoryPath"/>.
+    /// Returns false when no such source is registered.
+    /// </summary>
+    Task<bool> RemoveAsync(string directoryPath, CancellationToken cancellationToken = default);
 }

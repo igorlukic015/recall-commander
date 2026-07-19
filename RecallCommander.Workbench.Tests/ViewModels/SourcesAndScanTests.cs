@@ -48,6 +48,36 @@ public sealed class SourcesAndScanTests
     }
 
     [Fact]
+    public async Task Remove_source_unregisters_the_selected_source_and_reloads_the_list()
+    {
+        await _harness.AddRegisteredSourceAsync("/notes", "question");
+        await _harness.AddRegisteredSourceAsync("/research", "question");
+
+        MainWindowViewModel viewModel = _harness.CreateViewModel();
+        await viewModel.RefreshSourcesCommand.ExecuteAsync(null);
+        viewModel.SelectedSource = viewModel.Sources.First(source => source.DirectoryPath == "/notes");
+
+        await viewModel.RemoveSourceCommand.ExecuteAsync(null);
+
+        Assert.Contains("Removed question source: /notes", viewModel.OutputText);
+        Assert.Equal("/research", Assert.Single(viewModel.Sources).DirectoryPath);
+    }
+
+    [Fact]
+    public async Task Remove_source_without_a_selection_asks_for_one()
+    {
+        await _harness.AddRegisteredSourceAsync("/notes", "question");
+
+        MainWindowViewModel viewModel = _harness.CreateViewModel();
+        await viewModel.RefreshSourcesCommand.ExecuteAsync(null);
+
+        await viewModel.RemoveSourceCommand.ExecuteAsync(null);
+
+        Assert.Contains("Select a source to remove.", viewModel.OutputText);
+        Assert.Single(viewModel.Sources);
+    }
+
+    [Fact]
     public async Task Refresh_sources_reloads_the_list()
     {
         MainWindowViewModel viewModel = _harness.CreateViewModel();

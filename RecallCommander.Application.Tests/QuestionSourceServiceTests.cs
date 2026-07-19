@@ -49,6 +49,43 @@ public sealed class QuestionSourceServiceTests
     }
 
     [Fact]
+    public async Task Removes_a_registered_source()
+    {
+        _fileSystem.AddDirectory("/notes");
+        QuestionSourceService service = CreateService();
+        await service.AddAsync("/notes");
+
+        RemoveSourceResult result = await service.RemoveAsync("/notes");
+
+        Assert.Equal(RemoveSourceStatus.Removed, result.Status);
+        Assert.Equal("/notes", result.DirectoryPath);
+        Assert.Empty(await _repository.GetAllAsync());
+    }
+
+    [Fact]
+    public async Task Removing_an_unregistered_source_is_reported()
+    {
+        RemoveSourceResult result = await CreateService().RemoveAsync("/never-added");
+
+        Assert.Equal(RemoveSourceStatus.NotRegistered, result.Status);
+    }
+
+    [Fact]
+    public async Task Removes_a_stale_source_whose_directory_no_longer_exists()
+    {
+        _fileSystem.AddDirectory("/notes");
+        QuestionSourceService service = CreateService();
+        await service.AddAsync("/notes");
+
+        // Simulate the directory disappearing after registration.
+        RemoveSourceResult result = await new QuestionSourceService(
+            _repository, new FakeFileSystem(), TimeProvider.System).RemoveAsync("/notes");
+
+        Assert.Equal(RemoveSourceStatus.Removed, result.Status);
+        Assert.Empty(await _repository.GetAllAsync());
+    }
+
+    [Fact]
     public async Task Lists_sources_in_registration_order()
     {
         _fileSystem.AddDirectory("/a").AddDirectory("/b");

@@ -151,6 +151,31 @@ public sealed class AssessmentWorkflowTests : IDisposable
     }
 
     [Fact]
+    public async Task Source_remove_unregisters_a_source()
+    {
+        await _cli.RunAsync("init");
+        await _cli.RunAsync("source", "add", _workspace.QuestionsDirectory);
+
+        CliResult remove = await _cli.RunAsync("source", "remove", _workspace.QuestionsDirectory);
+        Assert.Equal(0, remove.ExitCode);
+        Assert.Contains("Removed question source", remove.Output);
+
+        CliResult list = await _cli.RunAsync("source", "list");
+        Assert.Contains("No question sources registered", list.Output);
+    }
+
+    [Fact]
+    public async Task Removing_an_unregistered_source_fails()
+    {
+        await _cli.RunAsync("init");
+
+        CliResult remove = await _cli.RunAsync("source", "remove", _workspace.QuestionsDirectory);
+
+        Assert.Equal(1, remove.ExitCode);
+        Assert.Contains("not registered", remove.Output);
+    }
+
+    [Fact]
     public async Task Duplicate_source_registration_is_reported()
     {
         await _cli.RunAsync("init");

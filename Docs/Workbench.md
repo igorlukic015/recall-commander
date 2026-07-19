@@ -55,7 +55,7 @@ Review                   (written to Reviews/, previewed read-only)
 ```
 +------------------------------------------------------------------+
 | Menu: Sources | Assessment | Attempt | Review | Configuration |… |
-| Toolbar: Add Source | Remove Source* | Scan Sources |            |
+| Toolbar: Add Source | Remove Source | Scan Sources |             |
 |          Questions: [10] Create Assessment |                     |
 |          Select Attempt | Validate Attempt | Create Review       |
 +---------------------------+--------------------------------------+
@@ -71,7 +71,6 @@ Review                   (written to Reviews/, previewed read-only)
 | F2 Add Source | F3 Scan | F4 Create | F5 Attempt | F6 Validate | |
 | F7 Review | Alt+F4 Exit                                          |
 +------------------------------------------------------------------+
-   * disabled — not implemented yet
 ```
 
 - **Left column** — two stacked list panels: registered Question Sources
@@ -88,6 +87,7 @@ Review                   (written to Reviews/, previewed read-only)
 | Action | Shortcut | What it does |
 |---|---|---|
 | Add Source | F2 | Folder picker → `QuestionSourceService.AddAsync` (same as `rc source add`) |
+| Remove Source | — | Unregisters the selected source (same as `rc source remove`); asks for a selection if none; never touches the directory itself |
 | Refresh Sources | — | Reloads the source list from the database |
 | Scan Sources | F3 | `ScanService.ScanAsync`; warnings go to Output, totals to the status bar |
 | Create Assessment | F4 | `CreateAssessmentService.CreateAsync` with the question count from the toolbar (default 10) |
@@ -97,7 +97,6 @@ Review                   (written to Reviews/, previewed read-only)
 | Select Attempt | F5 | File picker for the completed assessment file; also previews it |
 | Validate Attempt | F6 | `ValidateAttemptService.Validate` (same as `rc attempt validate`); result and diagnostics go to Output |
 | Create Review | F7 | `CreateReviewService.CreateAsync` (same as `rc review create`) on the selected attempt (asks for one if none is selected); reports the review path and previews the created review read-only |
-| Remove Source | — | Disabled — not implemented (matches the CLI) |
 
 On startup the Workbench initializes the workspace exactly like `rc init`
 (idempotent), then loads the registered sources and existing assessments.
@@ -147,7 +146,6 @@ dialog, opener and boundary services.
 
 ## Current Limitations
 
-- No source removal (matches the CLI)
 - Artifacts are listed from the current working directory's `Assessments/`
   folder, the same output location the CLI uses — start the Workbench from
   the directory where you keep your artifacts

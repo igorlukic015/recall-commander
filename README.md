@@ -17,6 +17,7 @@ The complete assessment workflow is implemented end-to-end:
 ```
 rc init                        # initialize the metadata store (SQLite)
 rc source add <path>           # register a directory of Markdown question files
+rc source remove <path>        # unregister a source (never touches the directory)
 rc source list                 # list registered question sources
 rc scan                        # discover Question Blocks across all sources
 rc assessment create           # generate an assessment (default: 10 questions)

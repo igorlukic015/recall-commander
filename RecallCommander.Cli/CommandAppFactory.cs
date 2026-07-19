@@ -57,6 +57,9 @@ public static class CommandAppFactory
                 source.AddCommand<SourceAddCommand>("add")
                     .WithDescription("Register a directory as a question source.");
 
+                source.AddCommand<SourceRemoveCommand>("remove")
+                    .WithDescription("Unregister a question source. Never touches the directory itself.");
+
                 source.AddCommand<SourceListCommand>("list")
                     .WithDescription("List registered question sources.");
             });

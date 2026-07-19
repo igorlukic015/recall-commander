@@ -468,6 +468,8 @@ rc init
 
 rc source add <path>
 
+rc source remove <path>
+
 rc source list
 
 rc scan
@@ -484,8 +486,6 @@ rc review create <file>
 Potential future commands:
 
 ```text
-rc source remove
-
 rc stats
 ```
 

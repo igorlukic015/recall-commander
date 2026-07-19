@@ -71,6 +71,29 @@ public sealed class SourceRepositoryTests : IDisposable
     }
 
     [Fact]
+    public async Task Remove_deletes_only_the_matching_source()
+    {
+        await InitializeAsync();
+        SqliteQuestionSourceRepository repository = CreateRepository();
+        await repository.AddAsync("/notes/csharp", DateTimeOffset.UtcNow);
+        await repository.AddAsync("/notes/physics", DateTimeOffset.UtcNow);
+
+        bool removed = await repository.RemoveAsync("/notes/csharp");
+
+        Assert.True(removed);
+        QuestionSource remaining = Assert.Single(await repository.GetAllAsync());
+        Assert.Equal("/notes/physics", remaining.DirectoryPath);
+    }
+
+    [Fact]
+    public async Task Removing_an_unknown_path_returns_false()
+    {
+        await InitializeAsync();
+
+        Assert.False(await CreateRepository().RemoveAsync("/never-added"));
+    }
+
+    [Fact]
     public async Task Data_persists_across_repository_instances()
     {
         await InitializeAsync();

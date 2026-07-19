@@ -129,6 +129,31 @@ public partial class MainWindowViewModel(
     }
 
     [RelayCommand]
+    private async Task RemoveSourceAsync()
+    {
+        try
+        {
+            if (SelectedSource is not { } source)
+            {
+                AppendOutput("Select a source to remove.");
+                return;
+            }
+
+            RemoveSourceResult result = await sources.RemoveAsync(source.DirectoryPath);
+
+            AppendOutput(result.Status == RemoveSourceStatus.Removed
+                ? $"Removed question source: {result.DirectoryPath}"
+                : $"Question source is not registered: {result.DirectoryPath}");
+
+            await ReloadSourcesAsync();
+        }
+        catch (Exception exception)
+        {
+            ReportFailure("Could not remove the source.", exception);
+        }
+    }
+
+    [RelayCommand]
     private async Task RefreshSourcesAsync()
     {
         try

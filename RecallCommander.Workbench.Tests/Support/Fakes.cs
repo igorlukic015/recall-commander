@@ -93,6 +93,9 @@ public sealed class InMemoryQuestionSourceRepository : IQuestionSourceRepository
 
     public Task<bool> ExistsAsync(string directoryPath, CancellationToken cancellationToken = default) =>
         Task.FromResult(_sources.Any(source => source.DirectoryPath == directoryPath));
+
+    public Task<bool> RemoveAsync(string directoryPath, CancellationToken cancellationToken = default) =>
+        Task.FromResult(_sources.RemoveAll(source => source.DirectoryPath == directoryPath) > 0);
 }
 
 /// <summary>Every call fails as if 'rc init' never ran.</summary>
@@ -108,6 +111,9 @@ public sealed class NotInitializedQuestionSourceRepository : IQuestionSourceRepo
         throw new Contracts.Exceptions.WorkspaceNotInitializedException();
 
     public Task<bool> ExistsAsync(string directoryPath, CancellationToken cancellationToken = default) =>
+        throw new Contracts.Exceptions.WorkspaceNotInitializedException();
+
+    public Task<bool> RemoveAsync(string directoryPath, CancellationToken cancellationToken = default) =>
         throw new Contracts.Exceptions.WorkspaceNotInitializedException();
 }
 

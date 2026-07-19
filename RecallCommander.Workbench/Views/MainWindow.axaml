@@ -168,7 +168,7 @@
         <Menu DockPanel.Dock="Top" Background="{DynamicResource BarBackgroundBrush}">
             <MenuItem Header="_Sources">
                 <MenuItem Header="_Add Source" InputGesture="F2" Command="{Binding AddSourceCommand}" />
-                <MenuItem Header="_Remove Source" IsEnabled="False" />
+                <MenuItem Header="_Remove Source" Command="{Binding RemoveSourceCommand}" />
                 <MenuItem Header="Re_fresh Sources" Command="{Binding RefreshSourcesCommand}" />
                 <Separator />
                 <MenuItem Header="S_can Sources" InputGesture="F3" Command="{Binding ScanSourcesCommand}" />
@@ -210,11 +210,9 @@
 
                 <Button Classes="toolbar" Content="Add Source" Command="{Binding AddSourceCommand}" />
 
-                <!-- The border carries the tooltip: disabled controls do not
-                     always trigger tooltips themselves. -->
-                <Border Background="Transparent" ToolTip.Tip="Removing sources is not supported yet.">
-                    <Button Classes="toolbar" Content="Remove Source" IsEnabled="False" />
-                </Border>
+                <Button Classes="toolbar" Content="Remove Source"
+                        Command="{Binding RemoveSourceCommand}"
+                        ToolTip.Tip="Unregisters the selected source. The directory itself is never touched." />
 
                 <Button Classes="toolbar" Content="Scan Sources" Command="{Binding ScanSourcesCommand}" />
 

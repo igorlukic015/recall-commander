@@ -5,7 +5,7 @@ using RecallCommander.Domain;
 namespace RecallCommander.Application.Sources;
 
 /// <summary>
-/// Registers and lists question sources.
+/// Registers, removes and lists question sources.
 /// </summary>
 public sealed class QuestionSourceService(
     IQuestionSourceRepository repository,
@@ -28,6 +28,22 @@ public sealed class QuestionSourceService(
 
         QuestionSource source = await repository.AddAsync(directoryPath, timeProvider.GetUtcNow(), cancellationToken);
         return new AddSourceResult(AddSourceStatus.Added, directoryPath, source);
+    }
+
+    /// <summary>
+    /// Unregisters a source. The directory does not need to exist — removing
+    /// a stale registration is the main use case. The directory's contents
+    /// are never touched; only the registration is removed.
+    /// </summary>
+    public async Task<RemoveSourceResult> RemoveAsync(string path, CancellationToken cancellationToken = default)
+    {
+        string directoryPath = fileSystem.NormalizePath(path);
+
+        bool removed = await repository.RemoveAsync(directoryPath, cancellationToken);
+
+        return new RemoveSourceResult(
+            removed ? RemoveSourceStatus.Removed : RemoveSourceStatus.NotRegistered,
+            directoryPath);
     }
 
     public Task<IReadOnlyList<QuestionSource>> ListAsync(CancellationToken cancellationToken = default) =>

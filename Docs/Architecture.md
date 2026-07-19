@@ -228,7 +228,7 @@ Current structure:
 ```
 Application/
     Sources/
-        QuestionSourceService.cs      # Register and list question sources
+        QuestionSourceService.cs      # Register, remove and list question sources
         AddSourceResult.cs
     Scanning/
         ScanService.cs                # Scan all sources, aggregate questions + warnings
