@@ -1,0 +1,74 @@
+# ADOS inception state — Recall Commander
+# NOTE: built from the bootstrapper agent spec; the official template
+# (doc/templates/inception-state-template.yaml) was not available in this repo.
+# See doc/inception/open-questions/phase-0-open-questions.md (OPEN-Q1).
+# Never store secrets, tokens, or credentials in this file.
+
+schema_version: "1-spec-derived"
+project:
+  name: recall-commander
+  flow: legacy            # confirmed by human 2026-11-15; do not re-derive on resume
+  repo_profile: dotnet-layered-monolith-cli-desktop
+  default_branch: main
+  remote_platform: github
+  started: 2026-11-15
+  delivery_mode: pr-per-phase
+
+characteristics:
+  code_project: true
+  ui_bearing: true        # CLI (rc) + Avalonia Workbench desktop app
+  multi_user: false       # single-user local tool; multi-user explicitly out of scope
+  complex_domain: true    # Question Block -> Question -> Assessment -> Attempt -> Review lifecycle
+
+current_phase: 0
+
+phases:
+  "0": { name: intake-and-material-scan, status: approved-awaiting-merge, branch: inception/phase-0, gate_approved: 2026-11-15 }
+  "1": { name: north-star-and-vision, status: pending }
+  "2": { name: scope-and-roadmap, status: pending }
+  "3": { name: tech-stack-and-architecture, status: pending }
+  "4": { name: domain-conventions-quality-baseline, status: pending }
+  "5": { name: ados-framework-integration, status: pending }
+  "6": { name: inception-readiness-check, status: pending }
+  "7": { name: inception-summary-and-handoff, status: pending }
+
+artifacts:
+  inception-state:
+    path: doc/inception/inception-state.yaml
+    status: approved
+    confidence: medium    # schema not checked against official template
+  material-inventory:
+    path: doc/inception/analysis/material-inventory.md
+    status: approved
+    confidence: high
+  repo-analysis:
+    path: doc/inception/analysis/repo-analysis.md
+    status: approved
+    confidence: high
+  tribal-knowledge:
+    path: doc/inception/analysis/tribal-knowledge.md
+    status: approved
+    confidence: medium    # short history (7 commits on main, squashed MVP); mostly doc-sourced
+  open_questions:
+    - path: doc/inception/open-questions/phase-0-open-questions.md
+      status: draft
+  retrospective_notes:
+    - path: doc/inception/retrospective/20261115-162355-phase-0-intake.md
+      status: draft
+
+decisions_pending:
+  - id: agents-md-infra-reference-drift
+    summary: "AGENTS.md claims Infrastructure->Application reference; csproj has none (OPEN-Q3)"
+    phase_to_resolve: 5
+  - id: docs-folder-layout
+    summary: "Docs/ (existing) vs doc/ (ADOS) — side by side for now; move later or now?"
+    phase_to_resolve: 5
+  - id: tracker
+    summary: "GitHub Issues vs local markdown backlog"
+    phase_to_resolve: 5
+
+overwrite_policy:
+  AGENTS.md: merge            # keep opencode hard rules; tell user about any overwrite
+  .env.example: merge
+
+security_incidents: []        # no prompt-injection or credential findings during Phase 0 scan
