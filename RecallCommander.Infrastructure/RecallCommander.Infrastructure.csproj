@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <ItemGroup>
+        <PackageReference Include="Dapper" />
+        <PackageReference Include="Microsoft.Data.Sqlite" />
+        <PackageReference Include="Microsoft.Extensions.Configuration" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+        <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../RecallCommander.Contracts/RecallCommander.Contracts.csproj" />
+        <ProjectReference Include="../RecallCommander.Domain/RecallCommander.Domain.csproj" />
+    </ItemGroup>
+
+</Project>
